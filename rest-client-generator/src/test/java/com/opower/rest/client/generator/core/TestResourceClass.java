@@ -51,6 +51,11 @@ public class TestResourceClass {
         String testMethod();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void emptyResourceInterfaceFails() {
+        new ResourceInterface<>(EmptyResourceInterface.class);
+    }
+
     private interface AlmostValidResourceClass {
         @GET
         String getId();
@@ -60,5 +65,9 @@ public class TestResourceClass {
     private interface ValidResourceClass {
         @GET
         public String getId();
+    }
+
+    private interface EmptyResourceInterface {
+
     }
 }
