@@ -42,6 +42,9 @@ public class ResourceInterface<T> {
         checkArgument(resourceInterface.isInterface(),
                 "The resource class must be an interface with all methods annotated with JAX-RS annotations");
 
+        checkArgument(resourceInterface.getMethods().length > 0, "Empty resource interfaces are not valid. "
+                + "You must specify at least one method");
+
         for (Method m : resourceInterface.getMethods()) {
             checkArgument(IsHttpMethod.isHttpMethod(m),
                     String.format("Method [%s] is not annotated with one or more HttpMethod annotations.", m.getName()));
