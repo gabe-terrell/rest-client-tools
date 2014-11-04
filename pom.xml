@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -12,7 +10,7 @@
 
     <groupId>com.opower</groupId>
     <artifactId>rest-client-tools</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -36,7 +34,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:opower/rest-client-tools.git</connection>
-        <tag>HEAD</tag>
+        <tag>1.1.0</tag>
         <developerConnection>scm:git:git@github.com:opower/rest-client-tools.git</developerConnection>
     </scm>
 
@@ -92,12 +90,12 @@
                             <consoleOutput>true</consoleOutput>
                             <checkstyleRules>
                                 <module name="Checker">
-                                    <module name="FileTabCharacter"/>
+                                    <module name="FileTabCharacter" />
 
-                                    <module name="Translation"/>
+                                    <module name="Translation" />
 
                                     <module name="FileLength">
-                                        <property name="max" value="1024"/>
+                                        <property name="max" value="1024" />
                                     </module>
 
                                     <!-- ============================================================= -->
@@ -105,11 +103,11 @@
                                     <!-- See: http://checkstyle.sourceforge.net/config.html            -->
                                     <!-- In some cases, we need a way to disable checks in code.       -->
                                     <!-- ============================================================= -->
-                                    <module name="SuppressionCommentFilter"/>
+                                    <module name="SuppressionCommentFilter" />
 
                                     <module name="TreeWalker">
-                                        <property name="tabWidth" value="4"/>
-                                        <module name="FileContentsHolder"/>
+                                        <property name="tabWidth" value="4" />
+                                        <module name="FileContentsHolder" />
 
                                         <!-- ============================================================= -->
                                         <!-- Annotation                                                    -->
@@ -117,29 +115,29 @@
                                         <!-- We are explicitly not enabling the following checks:          -->
                                         <!-- * SuppressWarnings (If someone is using it, they need it)     -->
                                         <!-- ============================================================= -->
-                                        <module name="MissingDeprecated"/>
-                                        <module name="MissingOverride"/>
-                                        <module name="PackageAnnotation"/>
-                                        <module name="AnnotationUseStyle"/>
+                                        <module name="MissingDeprecated" />
+                                        <module name="MissingOverride" />
+                                        <module name="PackageAnnotation" />
+                                        <module name="AnnotationUseStyle" />
 
                                         <!-- ============================================================= -->
                                         <!-- Blocks                                                        -->
                                         <!-- http://checkstyle.sourceforge.net/config_blocks.html          -->
                                         <!-- ============================================================= -->
-                                        <module name="AvoidNestedBlocks"/>
-                                        <module name="NeedBraces"/>
+                                        <module name="AvoidNestedBlocks" />
+                                        <module name="NeedBraces" />
                                         <module name="EmptyBlock">
-                                            <property name="option" value="text"/>
+                                            <property name="option" value="text" />
                                         </module>
                                         <module name="ImportOrder">
-                                            <property name="option" value="bottom"/>
-                                            <property name="ordered" value="true"/>
+                                            <property name="option" value="bottom" />
+                                            <property name="ordered" value="true" />
                                         </module>
                                         <module name="LeftCurly">
-                                            <property name="option" value="eol"/>
+                                            <property name="option" value="eol" />
                                         </module>
                                         <module name="RightCurly">
-                                            <property name="option" value="same"/>
+                                            <property name="option" value="same" />
                                         </module>
 
                                         <!-- ============================================================= -->
@@ -149,18 +147,18 @@
                                         <!-- We are explicitly not enabling the following checks:          -->
                                         <!-- * DesignForExtension (Good idea, but excessive)               -->
                                         <!-- ============================================================= -->
-                                        <module name="FinalClass"/>
-                                        <module name="HideUtilityClassConstructor"/>
-                                        <module name="InnerTypeLast"/>
-                                        <module name="InterfaceIsType"/>
-                                        <module name="MutableException"/>
+                                        <module name="FinalClass" />
+                                        <module name="HideUtilityClassConstructor" />
+                                        <module name="InnerTypeLast" />
+                                        <module name="InterfaceIsType" />
+                                        <module name="MutableException" />
                                         <module name="ThrowsCount">
-                                            <property name="max" value="3"/>
+                                            <property name="max" value="3" />
                                         </module>
                                         <module name="VisibilityModifier">
                                             <property name="protectedAllowed" value="true" />
                                             <property name="packageAllowed" value="true" />
-                                            <property name="publicMemberPattern" value="^testRule.*$"/>
+                                            <property name="publicMemberPattern" value="^testRule.*$" />
                                         </module>
 
                                         <!-- ============================================================= -->
@@ -180,56 +178,56 @@
                                         <!-- * MissingCtor (If the default ctor works, it works)           -->
                                         <!-- * UnnecessaryParentheses                                      -->
                                         <!-- ============================================================= -->
-                                        <module name="CovariantEquals"/>
-                                        <module name="DeclarationOrder"/>
-                                        <module name="DefaultComesLast"/>
-                                        <module name="EmptyStatement"/>
-                                        <module name="EqualsAvoidNull"/>
-                                        <module name="EqualsHashCode"/>
-                                        <module name="ExplicitInitialization"/>
-                                        <module name="FallThrough"/>
-                                        <module name="InnerAssignment"/>
-                                        <module name="JUnitTestCase"/>
-                                        <module name="MagicNumber"/>
-                                        <module name="MissingSwitchDefault"/>
-                                        <module name="ModifiedControlVariable"/>
-                                        <module name="MultipleStringLiterals"/>
-                                        <module name="MultipleVariableDeclarations"/>
-                                        <module name="NoClone"/>
-                                        <module name="NoFinalizer"/>
-                                        <module name="OneStatementPerLine"/>
-                                        <module name="PackageDeclaration"/>
-                                        <module name="ParameterAssignment"/>
-                                        <module name="RedundantThrows"/>
-                                        <module name="SimplifyBooleanExpression"/>
-                                        <module name="SimplifyBooleanReturn"/>
-                                        <module name="StringLiteralEquality"/>
+                                        <module name="CovariantEquals" />
+                                        <module name="DeclarationOrder" />
+                                        <module name="DefaultComesLast" />
+                                        <module name="EmptyStatement" />
+                                        <module name="EqualsAvoidNull" />
+                                        <module name="EqualsHashCode" />
+                                        <module name="ExplicitInitialization" />
+                                        <module name="FallThrough" />
+                                        <module name="InnerAssignment" />
+                                        <module name="JUnitTestCase" />
+                                        <module name="MagicNumber" />
+                                        <module name="MissingSwitchDefault" />
+                                        <module name="ModifiedControlVariable" />
+                                        <module name="MultipleStringLiterals" />
+                                        <module name="MultipleVariableDeclarations" />
+                                        <module name="NoClone" />
+                                        <module name="NoFinalizer" />
+                                        <module name="OneStatementPerLine" />
+                                        <module name="PackageDeclaration" />
+                                        <module name="ParameterAssignment" />
+                                        <module name="RedundantThrows" />
+                                        <module name="SimplifyBooleanExpression" />
+                                        <module name="SimplifyBooleanReturn" />
+                                        <module name="StringLiteralEquality" />
                                         <module name="HiddenField">
-                                            <property name="tokens" value="VARIABLE_DEF"/>
-                                            <property name="ignoreFormat" value="^log$"/>
-                                            <property name="ignoreSetter" value="true"/>
-                                            <property name="ignoreConstructorParameter" value="true"/>
+                                            <property name="tokens" value="VARIABLE_DEF" />
+                                            <property name="ignoreFormat" value="^log$" />
+                                            <property name="ignoreSetter" value="true" />
+                                            <property name="ignoreConstructorParameter" value="true" />
                                         </module>
                                         <module name="IllegalCatch">
                                             <property name="illegalClassNames" value="java.lang.Throwable" />
                                         </module>
                                         <module name="IllegalInstantiation">
-                                            <property name="classes" value="java.lang.Boolean"/>
+                                            <property name="classes" value="java.lang.Boolean" />
                                         </module>
                                         <module name="IllegalToken">
-                                            <property name="tokens" value="DEC, INC"/>
+                                            <property name="tokens" value="DEC, INC" />
                                         </module>
                                         <module name="NestedForDepth">
-                                            <property name="max" value="2"/>
+                                            <property name="max" value="2" />
                                         </module>
                                         <module name="NestedIfDepth">
-                                            <property name="max" value="2"/>
+                                            <property name="max" value="2" />
                                         </module>
                                         <module name="NestedTryDepth">
-                                            <property name="max" value="2"/>
+                                            <property name="max" value="2" />
                                         </module>
                                         <module name="RequireThis">
-                                            <property name="checkMethods" value="false"/>
+                                            <property name="checkMethods" value="false" />
                                         </module>
 
                                         <!-- ============================================================= -->
@@ -244,11 +242,11 @@
                                         <!-- Imports                                                       -->
                                         <!-- See: http://checkstyle.sourceforge.net/config_imports.html    -->
                                         <!-- ============================================================= -->
-                                        <module name="IllegalImport"/>
-                                        <module name="RedundantImport"/>
-                                        <module name="UnusedImports"/>
+                                        <module name="IllegalImport" />
+                                        <module name="RedundantImport" />
+                                        <module name="UnusedImports" />
                                         <module name="AvoidStarImport">
-                                            <property name="allowStaticMemberImports" value="true"/>
+                                            <property name="allowStaticMemberImports" value="true" />
                                         </module>
 
                                         <!-- ============================================================= -->
@@ -256,23 +254,23 @@
                                         <!-- See: http://checkstyle.sourceforge.net/config_javadoc.html    -->
                                         <!-- ============================================================= -->
                                         <module name="JavadocType">
-                                            <property name="allowUnknownTags" value="false"/>
-                                            <property name="scope" value="package"/>
+                                            <property name="allowUnknownTags" value="false" />
+                                            <property name="scope" value="package" />
                                         </module>
                                         <module name="JavadocMethod">
-                                            <property name="allowMissingJavadoc" value="false"/>
-                                            <property name="allowMissingParamTags" value="false"/>
-                                            <property name="allowMissingPropertyJavadoc" value="true"/>
-                                            <property name="allowMissingReturnTag" value="false"/>
-                                            <property name="allowMissingThrowsTags" value="false"/>
-                                            <property name="allowUndeclaredRTE" value="true"/>
-                                            <property name="scope" value="package"/>
+                                            <property name="allowMissingJavadoc" value="false" />
+                                            <property name="allowMissingParamTags" value="false" />
+                                            <property name="allowMissingPropertyJavadoc" value="true" />
+                                            <property name="allowMissingReturnTag" value="false" />
+                                            <property name="allowMissingThrowsTags" value="false" />
+                                            <property name="allowUndeclaredRTE" value="true" />
+                                            <property name="scope" value="package" />
                                         </module>
                                         <module name="JavadocStyle">
-                                            <property name="checkEmptyJavadoc" value="true"/>
-                                            <property name="checkFirstSentence" value="true"/>
-                                            <property name="checkHtml" value="true"/>
-                                            <property name="scope" value="package"/>
+                                            <property name="checkEmptyJavadoc" value="true" />
+                                            <property name="checkFirstSentence" value="true" />
+                                            <property name="checkHtml" value="true" />
+                                            <property name="scope" value="package" />
                                         </module>
 
                                         <!-- ============================================================= -->
@@ -293,21 +291,21 @@
                                         <!-- * FinalParameters (ParameterAssignment check protects)        -->
                                         <!-- * DescendantToken                                             -->
                                         <!-- ============================================================= -->
-                                        <module name="ArrayTypeStyle"/>
-                                        <module name="Indentation"/>
-                                        <module name="OuterTypeFilename"/>
-                                        <module name="TrailingComment"/>
-                                        <module name="UpperEll"/>
+                                        <module name="ArrayTypeStyle" />
+                                        <module name="Indentation" />
+                                        <module name="OuterTypeFilename" />
+                                        <module name="TrailingComment" />
+                                        <module name="UpperEll" />
                                         <module name="UncommentedMain">
-                                            <property name="excludedClasses" value="\.*(Main|Service|Job)$"/>
+                                            <property name="excludedClasses" value="\.*(Main|Service|Job)$" />
                                         </module>
 
                                         <!-- ============================================================= -->
                                         <!-- Modifiers                                                     -->
                                         <!-- http://checkstyle.sourceforge.net/config_modifier.html        -->
                                         <!-- ============================================================= -->
-                                        <module name="ModifierOrder"/>
-                                        <module name="RedundantModifier"/>
+                                        <module name="ModifierOrder" />
+                                        <module name="RedundantModifier" />
 
                                         <!-- ============================================================= -->
                                         <!-- Naming Conventions                                            -->
@@ -316,13 +314,13 @@
                                         <!-- We are explicitly not enabling the following checks:          -->
                                         <!-- * AbstractClassName (We're not Spring)                        -->
                                         <!-- ============================================================= -->
-                                        <module name="LocalFinalVariableName"/>
-                                        <module name="LocalVariableName"/>
-                                        <module name="MethodName"/>
-                                        <module name="PackageName"/>
-                                        <module name="ParameterName"/>
-                                        <module name="StaticVariableName"/>
-                                        <module name="TypeName"/>
+                                        <module name="LocalFinalVariableName" />
+                                        <module name="LocalVariableName" />
+                                        <module name="MethodName" />
+                                        <module name="PackageName" />
+                                        <module name="ParameterName" />
+                                        <module name="StaticVariableName" />
+                                        <module name="TypeName" />
                                         <module name="ConstantName">
                                             <property name="format" value="^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$|log|logger" />
                                         </module>
@@ -335,19 +333,19 @@
                                         <!-- See: http://checkstyle.sourceforge.net/config_regexp.html     -->
                                         <!-- ============================================================= -->
                                         <module name="RegexpSinglelineJava">
-                                            <property name="format" value="^import junit\.framework\..*;$"/>
-                                            <property name="message" value="Illegal import of junit.framework library. Use org.junit instead."/>
-                                            <property name="ignoreComments" value="true"/>
+                                            <property name="format" value="^import junit\.framework\..*;$" />
+                                            <property name="message" value="Illegal import of junit.framework library. Use org.junit instead." />
+                                            <property name="ignoreComments" value="true" />
                                         </module>
                                         <module name="RegexpSinglelineJava">
-                                            <property name="format" value="^import com\.google\.common\.annotations\..*;$"/>
-                                            <property name="message" value="Use javadocs instead of documentation annotations."/>
-                                            <property name="ignoreComments" value="true"/>
+                                            <property name="format" value="^import com\.google\.common\.annotations\..*;$" />
+                                            <property name="message" value="Use javadocs instead of documentation annotations." />
+                                            <property name="ignoreComments" value="true" />
                                         </module>
                                         <module name="RegexpSinglelineJava">
-                                            <property name="format" value="^import org\.apache\.commons\.lang\..*;$"/>
-                                            <property name="message" value="Old/Legacy import of Apache commons-lang v2 library. Use the commons-lang3 variant if possible, or wrap import in CHECKSTYLE_OFF exclusions if not possible."/>
-                                            <property name="ignoreComments" value="true"/>
+                                            <property name="format" value="^import org\.apache\.commons\.lang\..*;$" />
+                                            <property name="message" value="Old/Legacy import of Apache commons-lang v2 library. Use the commons-lang3 variant if possible, or wrap import in CHECKSTYLE_OFF exclusions if not possible." />
+                                            <property name="ignoreComments" value="true" />
                                         </module>
 
 
@@ -356,40 +354,40 @@
                                         <!-- Sizes                                                         -->
                                         <!-- http://checkstyle.sourceforge.net/config_sizes.html           -->
                                         <!-- ============================================================= -->
-                                        <module name="OuterTypeNumber"/>
+                                        <module name="OuterTypeNumber" />
                                         <module name="AnonInnerLength">
-                                            <property name="max" value="16"/>
+                                            <property name="max" value="16" />
                                         </module>
                                         <module name="LineLength">
-                                            <property name="max" value="132"/>
-                                            <property name="ignorePattern" value="@see"/>
+                                            <property name="max" value="132" />
+                                            <property name="ignorePattern" value="@see" />
                                         </module>
                                         <module name="MethodLength">
-                                            <property name="max" value="128"/>
-                                            <property name="countEmpty" value="false"/>
+                                            <property name="max" value="128" />
+                                            <property name="countEmpty" value="false" />
                                         </module>
                                         <module name="ParameterNumber">
-                                            <property name="max" value="6"/>
+                                            <property name="max" value="6" />
                                         </module>
 
                                         <!-- ============================================================= -->
                                         <!-- Whitespace                                                    -->
                                         <!-- http://checkstyle.sourceforge.net/config_whitespace.html      -->
                                         <!-- ============================================================= -->
-                                        <module name="EmptyForInitializerPad"/>
-                                        <module name="EmptyForIteratorPad"/>
-                                        <module name="GenericWhitespace"/>
-                                        <module name="MethodParamPad"/>
-                                        <module name="NoWhitespaceAfter"/>
-                                        <module name="NoWhitespaceBefore"/>
-                                        <module name="ParenPad"/>
-                                        <module name="TypecastParenPad"/>
+                                        <module name="EmptyForInitializerPad" />
+                                        <module name="EmptyForIteratorPad" />
+                                        <module name="GenericWhitespace" />
+                                        <module name="MethodParamPad" />
+                                        <module name="NoWhitespaceAfter" />
+                                        <module name="NoWhitespaceBefore" />
+                                        <module name="ParenPad" />
+                                        <module name="TypecastParenPad" />
                                         <module name="OperatorWrap">
                                             <property name="tokens" value="BAND, BOR, BSR, BXOR, COLON, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, QUESTION, SL, SR, STAR" />
                                         </module>
                                         <module name="WhitespaceAround">
-                                            <property name="allowEmptyConstructors" value="true"/>
-                                            <property name="allowEmptyMethods" value="true"/>
+                                            <property name="allowEmptyConstructors" value="true" />
+                                            <property name="allowEmptyMethods" value="true" />
                                         </module>
                                     </module>
                                 </module>
