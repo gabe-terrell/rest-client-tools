@@ -24,12 +24,12 @@
         <dependency>
             <groupId>com.opower</groupId>
             <artifactId>rest-client-generator</artifactId>
-            <version>${project.version}</version>
+            <version>1.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.opower</groupId>
             <artifactId>rest-client-test</artifactId>
-            <version>${project.version}</version>
+            <version>1.1.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
