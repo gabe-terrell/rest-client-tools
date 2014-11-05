@@ -3,7 +3,7 @@
     <parent>
         <artifactId>rest-client-tools</artifactId>
         <groupId>com.opower</groupId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -24,12 +24,12 @@
         <dependency>
             <groupId>com.opower</groupId>
             <artifactId>rest-client-generator</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.opower</groupId>
             <artifactId>rest-client-test</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
+            <version>1.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
