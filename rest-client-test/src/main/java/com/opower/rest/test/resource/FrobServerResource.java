@@ -67,4 +67,14 @@ public class FrobServerResource implements FrobResource {
     public String frobString(String echo) {
         return String.format("You sent %s", echo);
     }
+
+    @Override
+    public Frob frobJsonError() {
+        return new Frob("testId");
+    }
+
+    @Override
+    public Frob frobErrorResponse() {
+        throw new RuntimeException("bork");
+    }
 }
