@@ -73,4 +73,20 @@ public interface FrobResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     String frobString(@QueryParam("echo")String echo);
+
+    /**
+     * Used for testing logic in ClientErrorHandler.
+     * @return a dummy Frob
+     */
+    @GET
+    @Path("jsonerror")
+    Frob frobJsonError();
+
+    /**
+     * Used for testing logic in ClientErrorHandler.
+     * @return a dummy Frob
+     */
+    @GET
+    @Path("errorcode")
+    Frob frobErrorResponse();
 }
