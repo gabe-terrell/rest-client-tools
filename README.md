@@ -109,7 +109,22 @@ Here is an example of a resource interface. Note that it's simply a java interfa
           };
    
     clientBuilder.addClientRequestFilter(filter); // filters are applied in the order they are added.
-  
+
+  By default, http response codes between 400 (Bad Request) and 599 (Network Connect Timeout) are considered errors and
+  cause a ClientResponseFailure to be thrown. In some cases you may want certain response codes to not be treated as an Exception.
+  For example, you might have an endpoint for checking for an item in inventory and want to have it return 404 if no
+  inventory is available. In such a case you can use a custom errorStatusCriteria.
+
+    // The Predicate specifies which status codes should result in a ClientResponseFailure
+    Predicate<Integer> criteria = new Predicate<Integer>() {
+            @Override
+            public boolean apply(Integer status) {
+                return 404 != status && status >= BAD_REQUEST && status <= NETWORK_CONNECT_TIMEOUT;
+            }
+        };
+
+    clientBuilder.errorStatusCriteria(criteria);
+
   ClientErrorInterceptor defines the proxy's behavior in case of errors. Here is how you would specify your own list of custom ClientErrorInterceptors.
   
     List<ClientErrorInterceptor> interceptors = ImmutableList.<ClientErrorInterceptor>of(new ClientErrorInterceptor() {

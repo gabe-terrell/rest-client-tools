@@ -20,7 +20,7 @@ public class TestClientRequest {
 
     @Before
     public void setUp() {
-        request = new ClientRequest("http://dummy", null, null);
+        request = new ClientRequest("http://dummy", null, null, null);
     }
 
     @Test

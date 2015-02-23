@@ -110,7 +110,8 @@ public class ApacheHttpClient4Executor extends AbstractClientExecutor {
 
         final HttpResponse res = this.httpClient.execute(httpMethod, this.httpContext);
 
-        BaseClientResponse response = new BaseClientResponse(new SimpleBaseClientResponseStreamFactory(res), this);
+        BaseClientResponse response = new BaseClientResponse(new SimpleBaseClientResponseStreamFactory(res), this,
+                                                             request.getErrorStatusCriteria());
 
         response.setStatus(res.getStatusLine().getStatusCode());
         response.setHeaders(extractHeaders(res));

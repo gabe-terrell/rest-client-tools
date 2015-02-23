@@ -14,6 +14,7 @@
  **/
 package com.opower.rest.client.generator.core;
 
+import com.google.common.base.Predicate;
 import com.opower.rest.client.generator.specimpl.MultivaluedMapImpl;
 import com.opower.rest.client.generator.specimpl.UriBuilderImpl;
 import com.opower.rest.client.generator.util.Encode;
@@ -30,6 +31,7 @@ import javax.ws.rs.ext.Providers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class ClientRequest implements Cloneable {
     private final ProxyConfig proxyConfig;
+    private final Method method;
     protected UriBuilderImpl uri;
     protected ClientExecutor executor;
     protected MultivaluedMap<String, Object> headers;
@@ -66,14 +69,15 @@ public class ClientRequest implements Cloneable {
     protected String finalUri;
     protected List<String> pathParameterList;
 
-    public ClientRequest(String uriTemplate, ClientExecutor executor, ProxyConfig proxyConfig) {
-        this((UriBuilderImpl) new UriBuilderImpl().uriTemplate(uriTemplate), executor, proxyConfig);
+    public ClientRequest(String uriTemplate, ClientExecutor executor, ProxyConfig proxyConfig, Method method) {
+        this((UriBuilderImpl) new UriBuilderImpl().uriTemplate(uriTemplate), executor, proxyConfig, method);
     }
 
-    public ClientRequest(UriBuilderImpl uriBuilder, ClientExecutor executor, ProxyConfig proxyConfig) {
+    public ClientRequest(UriBuilderImpl uriBuilder, ClientExecutor executor, ProxyConfig proxyConfig, Method method) {
         this.uri = uriBuilder;
         this.executor = executor;
         this.proxyConfig = proxyConfig;
+        this.method = method;
     }
 
     public boolean followRedirects() {
@@ -230,6 +234,10 @@ public class ClientRequest implements Cloneable {
 
     public String getHttpMethod() {
         return httpMethod;
+    }
+
+    public Predicate<Integer> getErrorStatusCriteria() {
+        return this.proxyConfig.getErrorStatusCriteria().get(this.method);
     }
 
     public ClientResponse execute(String httpMethod) throws Exception {
