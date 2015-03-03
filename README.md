@@ -34,6 +34,7 @@ implementation on your classpath. In that case just:
 
 Now you can create client proxies in apps where you don't want or need any server side component of JAX-RS.
 
+For more background information check out our [Engineering Blog](http://opower.github.io/2015/01/30/rest-client-tools/).
 
 ######Features
 
@@ -68,23 +69,23 @@ Here is an example of a resource interface. Note that it's simply a java interfa
  Here is a server side resource implementation example:
  
     public class FrobServerResource implments FrobResource {
-      // notice there are no JAX-RX annotations here. That is because
-      // the annotations belong on the interface ONLY. In some cases this
-      // can cause your endpoints to not function correctly. Or if you only put
-      // an annotation here and its missing from the interface, your clients won't
-      // function correctly since they don't have access to your server side resources
-      public Frob updateFrob(String frobId, String name) {
-          // do work here probably with dao and stuff
-      }
-       
-      public Frob findFrob(String frobId) {
-          // find frob work here
-      }
-   
-      public Response createFrob(Frob frob) {
-          // do more work
-      }
-  }
+        // notice there are no JAX-RX annotations here. That is because
+        // the annotations belong on the interface ONLY. In some cases this
+        // can cause your endpoints to not function correctly. Or if you only put
+        // an annotation here and its missing from the interface, your clients won't
+        // function correctly since they don't have access to your server side resources
+        public Frob updateFrob(String frobId, String name) {
+           // do work here probably with dao and stuff
+        }
+
+        public Frob findFrob(String frobId) {
+           // find frob work here
+        }
+
+        public Response createFrob(Frob frob) {
+            // do more work
+        }
+    }
    
  
   Once you have imported the Client.Builder you can use its fluent interface to create and customize a proxy instance for a given resource interface. 
@@ -94,9 +95,8 @@ Here is an example of a resource interface. Note that it's simply a java interfa
   They wrap calls in HystrixCommands to gives you circuit breaker protection.
   The rest-client-tools proxy builder requires a UriProvider implementation that tells clients how to find a service instance.
   
-    Client.Builder<FrobResource> clientBuilder = new Client.Builder<>(FrobResource.class, serviceDiscovery, serviceName, OAUTH_CLIENT_ID)
-                              .clientSecret(OAUTH_CLIENT_SECRET) // by specifying the oauth2 client secret, 
-                                                                 // you enable the auth-service integration
+    Client.Builder<FrobResource> clientBuilder = new Client.Builder<>(FrobResource.class, serviceDiscovery, serviceName, OAUTH_CLIENT_ID);
+
                               
   You may need to alter the proxy's requests before they are sent. For instance, you may need to add a header or some other parameter to the request.
   
@@ -109,12 +109,27 @@ Here is an example of a resource interface. Note that it's simply a java interfa
           };
    
     clientBuilder.addClientRequestFilter(filter); // filters are applied in the order they are added.
-  
+
+  By default, http response codes between 400 (Bad Request) and 599 (Network Connect Timeout) are considered errors and
+  cause a ClientResponseFailure to be thrown. In some cases you may want certain response codes to not be treated as an Exception.
+  For example, you might have an endpoint for checking for an item in inventory and want to have it return 404 if no
+  inventory is available. In such a case you can use a custom errorStatusCriteria.
+
+    // The Predicate specifies which status codes should result in a ClientResponseFailure
+    Predicate<Integer> criteria = new Predicate<Integer>() {
+            @Override
+            public boolean apply(Integer status) {
+                return 404 != status && status >= BAD_REQUEST && status <= NETWORK_CONNECT_TIMEOUT;
+            }
+        };
+
+    clientBuilder.errorStatusCriteria(criteria);
+
   ClientErrorInterceptor defines the proxy's behavior in case of errors. Here is how you would specify your own list of custom ClientErrorInterceptors.
   
     List<ClientErrorInterceptor> interceptors = ImmutableList.<ClientErrorInterceptor>of(new ClientErrorInterceptor() {
               @Override
-              public void handle(ClientResponse<?> response) throws RuntimeException {
+              public void handle(ClientResponse response) throws RuntimeException {
                   // handle the error response as you see fit
                   throw new SpecialException(response.getResponseStatus());
               }
@@ -126,7 +141,7 @@ Here is an example of a resource interface. Note that it's simply a java interfa
   
     JacksonJsonProvider jsonProvider = new JacksonJsonProvider();
      
-    clientBuilder.messageBodyProviders(jsonProvider, jsonProvider);
+    clientBuilder.registerProviderInstance(jsonProvider);
  
  
   Client proxy instances require a ClientExecutor instance that will actually perform the http requests.

@@ -14,6 +14,7 @@
  **/
 package com.opower.rest.client.generator.core;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.opower.rest.client.generator.util.CaseInsensitiveMap;
@@ -45,7 +46,7 @@ public class BaseClientResponse extends ClientResponse {
     private static final Logger LOG = LoggerFactory.getLogger(BaseClientResponse.class);
     protected Providers providers;
     protected String attributeExceptionsTo;
-    protected CaseInsensitiveMap<String> headers;
+    protected CaseInsensitiveMap<String> headers = new CaseInsensitiveMap<>();
     protected String alternateMediaType;
     protected Class<?> returnType;
     protected Type genericReturnType;
@@ -58,26 +59,28 @@ public class BaseClientResponse extends ClientResponse {
     protected BaseClientResponseStreamFactory streamFactory;
     protected ClientExecutor executor;
 
-    private static final int BAD_REQUEST = 400;
-    private static final int NETWORK_CONNECT_TIMEOUT = 599;
-
+    private final Predicate<Integer> errorStatusCriteria;
 
     /**
      * Create an instance with the given StreamFactory and ClientExecutor.
      * @param streamFactory the StreamFactory to use
      * @param executor the ClientExecutor to use
+     * @param errorStatusCriteria
      */
-    public BaseClientResponse(BaseClientResponseStreamFactory streamFactory, ClientExecutor executor) {
+    public BaseClientResponse(BaseClientResponseStreamFactory streamFactory, ClientExecutor executor, Predicate<Integer> errorStatusCriteria) {
         this.streamFactory = streamFactory;
         this.executor = executor;
+        this.errorStatusCriteria = errorStatusCriteria;
     }
 
     /**
      * Create an instance with the given StreamFactory.
      * @param streamFactory the StreamFactory to use
+     * @param errorStatusCriteria
      */
-    public BaseClientResponse(BaseClientResponseStreamFactory streamFactory) {
+    public BaseClientResponse(BaseClientResponseStreamFactory streamFactory, Predicate<Integer> errorStatusCriteria) {
         this.streamFactory = streamFactory;
+        this.errorStatusCriteria = errorStatusCriteria;
     }
 
     /**
@@ -108,15 +111,13 @@ public class BaseClientResponse extends ClientResponse {
 
             public void performReleaseConnection() {
             }
-        });
+        }, base.errorStatusCriteria);
         tmp.executor = base.executor;
         tmp.status = base.status;
         tmp.providers = base.providers;
         tmp.headers = new CaseInsensitiveMap<>();
         tmp.headers.putAll(base.headers);
         return tmp;
-
-
     }
 
     public void setStatus(int status) {
@@ -327,7 +328,8 @@ public class BaseClientResponse extends ClientResponse {
      * Check the status code of the response to see if it falls in the range of failures.
      */
     public void checkFailureStatus() {
-        if (this.status >= BAD_REQUEST && this.status <= NETWORK_CONNECT_TIMEOUT) {
+
+        if (this.errorStatusCriteria.apply(this.status)) {
             throw createResponseFailure(String.format("Error status %d %s returned", this.status, getResponseStatus()));
         }
     }

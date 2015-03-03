@@ -87,7 +87,7 @@ public class ClientInvoker implements MethodInvoker {
         uri.uri(baseUriProvider.getUri());
         if (declaring.isAnnotationPresent(Path.class)) uri.path(declaring);
         if (method.isAnnotationPresent(Path.class)) uri.path(method);
-        ClientRequest request = new ClientRequest(uri, executor, proxyConfig);
+        ClientRequest request = new ClientRequest(uri, executor, proxyConfig, method);
         if (accepts != null) request.header(HttpHeaders.ACCEPT, accepts.toString());
 
         boolean isClientResponseResult = ClientResponse.class.isAssignableFrom(method.getReturnType());

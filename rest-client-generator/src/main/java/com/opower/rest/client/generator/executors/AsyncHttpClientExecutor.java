@@ -87,7 +87,8 @@ public class AsyncHttpClientExecutor extends AbstractClientExecutor {
 
         Response rawResponse = this.httpClient.executeRequest(requestBuilder.build()).get();
 
-        BaseClientResponse response = new BaseClientResponse(new SimpleBaseClientResponseStreamFactory(rawResponse), this);
+        BaseClientResponse response = new BaseClientResponse(new SimpleBaseClientResponseStreamFactory(rawResponse), this,
+                                                             request.getErrorStatusCriteria());
 
         response.setStatus(rawResponse.getStatusCode());
         response.setHeaders(extractHeaders(rawResponse));

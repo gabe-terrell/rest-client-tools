@@ -14,16 +14,22 @@
  **/
 package com.opower.rest.client.generator.core;
 
+import com.google.common.base.Predicate;
 import com.opower.rest.client.generator.extractors.DefaultEntityExtractorFactory;
 import com.opower.rest.client.generator.util.IsHttpMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.ws.rs.Path;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -32,6 +38,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <B> the type of the concrete builder
  */
 public abstract class Client<T, B extends Client<T, B>> {
+
+    protected static final Predicate<Integer> DEFAULT_ERROR_STATUS_CRITERIA = new Predicate<Integer>() {
+        @Override
+        public boolean apply(Integer status) {
+            checkNotNull(status);
+            return status >= BAD_REQUEST && status <= NETWORK_CONNECT_TIMEOUT;
+        }
+    };
+
+    protected static final int BAD_REQUEST = 400;
+    protected static final int NETWORK_CONNECT_TIMEOUT = 599;
+
+    private final ConcurrentMap<Method, Predicate<Integer>> errorStatusCriteria = new ConcurrentHashMap<>();
 
     protected ClientExecutor executor;
     protected ClientProviders clientProviders = new ClientProviders();
@@ -44,6 +63,42 @@ public abstract class Client<T, B extends Client<T, B>> {
         this.resourceInterface = checkNotNull(resourceInterface);
         this.uriProvider = checkNotNull(uriProvider);
         this.loader = checkNotNull(resourceInterface.getInterface().getClassLoader());
+        for (Method method : resourceInterface.getInterface().getMethods()) {
+            this.errorStatusCriteria.put(method, DEFAULT_ERROR_STATUS_CRITERIA);
+        }
+    }
+
+    /**
+     * Configures a custom {@link com.google.common.base.Predicate<Integer>} that defines which Http response codes should
+     * be treated as errors and cause the client proxy to throw an Exception. The specified {@link com.google.common.base.Predicate<Integer>}
+     * will be used for all methods on the resource interface.
+     * @param errorStatusCriteria The Predicate to use.
+     * @return the builder
+     */
+    @SuppressWarnings("unchecked")
+    public B errorStatusCriteria(Predicate<Integer> errorStatusCriteria) {
+        checkNotNull(errorStatusCriteria);
+        for (Method method : this.resourceInterface.getInterface().getDeclaredMethods()) {
+            errorStatusCriteriaForMethod(method, errorStatusCriteria);
+        }
+        return (B) this;
+    }
+
+    /**
+     *
+     * Configures a custom {@link com.google.common.base.Predicate<Integer>} that defines which Http response codes should
+     * be treated as errors and cause the client proxy to throw an Exception. The specified {@link com.google.common.base.Predicate<Integer>}
+     * will be used ONLY for the specified method.
+     *
+     * @param method the method on the resource interface
+     * @param errorStatusCriteria the Predicate to use.
+     * @return the builder
+     */
+    @SuppressWarnings("unchecked")
+    public B errorStatusCriteriaForMethod(Method method, Predicate<Integer> errorStatusCriteria) {
+        checkArgument(method != null && method.getDeclaringClass().equals(this.resourceInterface.getInterface()));
+        this.errorStatusCriteria.put(method, checkNotNull(errorStatusCriteria));
+        return (B) this;
     }
 
     @SuppressWarnings("unchecked")
@@ -71,7 +126,7 @@ public abstract class Client<T, B extends Client<T, B>> {
             throw new IllegalArgumentException("you must specify a MessageBodyWriter and a MessageBodyReader for serialization");
 
         final ProxyConfig config = new ProxyConfig(this.loader, this.executor, this.clientProviders, new DefaultEntityExtractorFactory(),
-                                                   this.clientErrorInterceptors);
+                                                   this.clientErrorInterceptors, this.errorStatusCriteria);
         return createProxy(this.resourceInterface.getInterface(), this.uriProvider, config);
     }
 

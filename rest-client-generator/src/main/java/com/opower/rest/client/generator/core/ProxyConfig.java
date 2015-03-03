@@ -15,30 +15,36 @@
 package com.opower.rest.client.generator.core;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.opower.rest.client.generator.extractors.EntityExtractorFactory;
 
 import javax.ws.rs.ext.Providers;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ProxyConfig {
+
     private final ClassLoader loader;
     private final ClientExecutor executor;
     private final Providers providers;
     private final EntityExtractorFactory extractorFactory;
     private final List<ClientErrorInterceptor> clientErrorInterceptors;
+    private final ConcurrentMap<Method, Predicate<Integer>> errorStatusCriteria;
 
     public ProxyConfig(ClassLoader loader, ClientExecutor executor, Providers providers,
-                       EntityExtractorFactory extractorFactory, List<ClientErrorInterceptor> clientErrorInterceptors) {
+                       EntityExtractorFactory extractorFactory, List<ClientErrorInterceptor> clientErrorInterceptors,
+                       ConcurrentMap<Method, Predicate<Integer>> errorStatusCriteria) {
         this.loader = checkNotNull(loader);
         this.executor = checkNotNull(executor);
         this.providers = checkNotNull(providers);
         this.extractorFactory = checkNotNull(extractorFactory);
         this.clientErrorInterceptors = Optional.fromNullable(clientErrorInterceptors).or(Lists.<ClientErrorInterceptor>newArrayList());
+        this.errorStatusCriteria = checkNotNull(errorStatusCriteria);
     }
-
 
     public ClassLoader getLoader() {
         return loader;
@@ -60,4 +66,7 @@ public class ProxyConfig {
         return clientErrorInterceptors;
     }
 
+    public ConcurrentMap<Method, Predicate<Integer>> getErrorStatusCriteria() {
+        return errorStatusCriteria;
+    }
 }
