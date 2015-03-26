@@ -9,6 +9,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.collect.ImmutableList;
 import com.opower.rest.client.generator.core.*;
 import com.opower.rest.client.generator.executors.ApacheHttpClient4Executor;
+import com.opower.rest.client.generator.util.HttpResponseCodes;
 import com.opower.rest.test.jetty.JettyRule;
 import com.opower.rest.test.resource.FrobResource;
 import org.hamcrest.BaseMatcher;
@@ -59,55 +60,17 @@ public class ClientErrorHandlingIntTest {
 
     @Test
     public void clientResponseFailureIsHandledByErrorInterceptor() {
-        expectedException.expect(ResponseError.class);
-        expectedException.expect(new StatusCodeMatcher(500));
-        frobResource.frobErrorResponse();
+        expectedException.expect(StatusCodeMatcher.ResponseError.class);
+        expectedException.expect(new StatusCodeMatcher(HttpResponseCodes.SC_INTERNAL_SERVER_ERROR));
+        frobResource.frobErrorResponse(HttpResponseCodes.SC_INTERNAL_SERVER_ERROR);
     }
 
-    private class StatusCodeMatcher extends BaseMatcher<ResponseError> {
-        private final int expectedCode;
-
-        private StatusCodeMatcher(int expectedCode) {
-            this.expectedCode = expectedCode;
-        }
-
-        @Override
-        public boolean matches(Object error) {
-            return getValue(error) == this.expectedCode;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            description.appendValue(this.expectedCode);
-        }
-
-        @Override
-        public void describeMismatch(Object error, Description description) {
-            description.appendText("was ").appendValue(getValue(error));
-        }
-
-        private int getValue(Object error) {
-            return ((ResponseError)checkNotNull(error)).getClientResponse().getStatus();
-        }
-    }
-
-    private class ResponseError extends RuntimeException {
-        private final ClientResponse clientResponse;
-
-        private ResponseError(ClientResponse clientResponse) {
-            this.clientResponse = checkNotNull(clientResponse);
-        }
-
-        public ClientResponse getClientResponse() {
-            return clientResponse;
-        }
-    }
 
     private class TestClientErrorInterceptor implements ClientErrorInterceptor {
 
         @Override
         public void handle(ClientResponse response) throws RuntimeException {
-            throw new ResponseError(response);
+            throw new StatusCodeMatcher.ResponseError(response);
         }
     }
 }

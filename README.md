@@ -187,4 +187,37 @@ Here is an example of a resource interface. Note that it's simply a java interfa
               }
           });
 
+
+  HystrixClient proxy instances wrap each http call in a HystrixCommand. Any exception thrown during request processing
+  can trip the Hystrix circuit breaker. There are some Exceptions that are intended to be part of the normal operation of
+  certain API designs and should not count towards circuit breaker or trigger fallbacks. For these cases the exceptions must
+  be wrapped in a
+   [HystrixBadRequestException](https://github.com/Netflix/Hystrix/wiki/How-To-Use#ErrorPropagation). When using the
+  HystrixClient.Builder you can provide a BadRequestCriteria instance to specify which responses or Exceptions should be wrapped in
+  HystrixBadRequestExceptions (not count toward circuit-breaker failures or trigger fallback logic). By default, any response
+  that returns a 400 Bad Request and the exception will be wrapped in a HystrixBadRequestException. Additionally, it should
+  be noted that beside bad responses from the server, there can be client side errors after a successful call to the server.
+  This can happen if there's a problem deserializing a response on the client side for instance. In such cases, the client side
+  exceptions are also wrapped in HystrixBadRequestExceptions.
+
+    // you can configure the criteria per method. In this example both 400 and 404 are treated as HystrixBadRequestExceptions
+    // Note the exception that was thrown is also available for inspection in your BadRequestCriteria implementation. This
+    // will either be the original exception or the Exception that was thrown by any ClientErrorInterceptor you have provided.
+    clientBuilder.methodBadRequestCriteria(findFrob, new HystrixClientErrorHandler.BadRequestCriteria() {
+                                  @Override
+                                  public boolean apply(BaseClientResponse response, Exception exception) {
+                                      int status = response.getStatus();
+                                      return  status == SC_NOT_FOUND || status == SC_BAD_REQUEST;
+                                  }
+                              })
+
+    // you can also provide criteria for the whole resource interface
+    clientBuilder.badRequestCriteria(new HystrixClientErrorHandler.BadRequestCriteria() {
+                                      @Override
+                                      public boolean apply(BaseClientResponse response, Exception exception) {
+                                          int status = response.getStatus();
+                                          return  status == SC_NOT_FOUND || status == SC_BAD_REQUEST;
+                                      }
+                                  })
+
 [1]: http://docs.oracle.com/javaee/6/api/javax/ws/rs/ext/RuntimeDelegate.html#getInstance()

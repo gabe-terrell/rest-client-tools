@@ -14,7 +14,6 @@
  **/
 package com.opower.rest.client.generator.core;
 
-import com.opower.rest.client.generator.extractors.ClientErrorHandler;
 import com.opower.rest.client.generator.extractors.ClientRequestContext;
 import com.opower.rest.client.generator.extractors.EntityExtractor;
 import com.opower.rest.client.generator.extractors.EntityExtractorFactory;
@@ -55,14 +54,14 @@ public class ClientInvoker implements MethodInvoker {
         this.method = method;
         this.marshallers = ClientMarshallerFactory.createMarshallers(declaring, method);
         this.executor = config.getExecutor();
-        accepts = MediaTypeHelper.getProduces(declaring, method);
+        this.accepts = MediaTypeHelper.getProduces(declaring, method);
         this.baseUriProvider = checkNotNull(baseUriProvider);
         this.extractorFactory = config.getExtractorFactory();
         this.extractor = extractorFactory.createExtractor(method);
     }
 
     public Method getMethod() {
-        return method;
+        return this.method;
     }
 
     public Object invoke(Object[] args) {
@@ -71,30 +70,29 @@ public class ClientInvoker implements MethodInvoker {
 
         BaseClientResponse clientResponse = null;
         try {
-            clientResponse = (BaseClientResponse) request.execute(httpMethod);
+            clientResponse = (BaseClientResponse) request.execute(this.httpMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        ClientErrorHandler errorHandler = new ClientErrorHandler(this.proxyConfig.getClientErrorInterceptors());
-        clientResponse.setAttributeExceptionsTo(method.toString());
-        clientResponse.setAnnotations(method.getAnnotations());
-        ClientRequestContext clientRequestContext = new ClientRequestContext(request, clientResponse, errorHandler);
-        return extractor.extractEntity(clientRequestContext);
+        clientResponse.setAttributeExceptionsTo(this.method.toString());
+        clientResponse.setAnnotations(this.method.getAnnotations());
+        ClientRequestContext clientRequestContext = new ClientRequestContext(request, clientResponse, this.proxyConfig.getClientErrorHandler());
+        return this.extractor.extractEntity(clientRequestContext);
     }
 
     protected ClientRequest createRequest(Object[] args) {
         UriBuilderImpl uri = new UriBuilderImpl();
-        uri.uri(baseUriProvider.getUri());
-        if (declaring.isAnnotationPresent(Path.class)) uri.path(declaring);
-        if (method.isAnnotationPresent(Path.class)) uri.path(method);
-        ClientRequest request = new ClientRequest(uri, executor, proxyConfig, method);
-        if (accepts != null) request.header(HttpHeaders.ACCEPT, accepts.toString());
+        uri.uri(this.baseUriProvider.getUri());
+        if (this.declaring.isAnnotationPresent(Path.class)) uri.path(this.declaring);
+        if (this.method.isAnnotationPresent(Path.class)) uri.path(this.method);
+        ClientRequest request = new ClientRequest(uri, this.executor, this.proxyConfig, this.method);
+        if (this.accepts != null) request.header(HttpHeaders.ACCEPT, this.accepts.toString());
 
-        boolean isClientResponseResult = ClientResponse.class.isAssignableFrom(method.getReturnType());
+        boolean isClientResponseResult = ClientResponse.class.isAssignableFrom(this.method.getReturnType());
         request.followRedirects(!isClientResponseResult || this.followRedirects);
 
-        for (int i = 0; i < marshallers.length; i++) {
-            marshallers[i].build(request, args[i]);
+        for (int i = 0; i < this.marshallers.length; i++) {
+            this.marshallers[i].build(request, args[i]);
         }
         return request;
     }

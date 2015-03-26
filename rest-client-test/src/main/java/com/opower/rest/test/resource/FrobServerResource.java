@@ -20,6 +20,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import java.util.concurrent.ExecutionException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -74,7 +75,7 @@ public class FrobServerResource implements FrobResource {
     }
 
     @Override
-    public Frob frobErrorResponse() {
-        throw new RuntimeException("bork");
+    public Frob frobErrorResponse(int status) {
+        throw new WebApplicationException(Response.Status.fromStatusCode(status));
     }
 }

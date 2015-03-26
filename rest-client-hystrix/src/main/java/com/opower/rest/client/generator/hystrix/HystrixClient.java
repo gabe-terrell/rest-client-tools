@@ -26,10 +26,13 @@ import com.opower.rest.client.ConfigurationCallback;
 import com.opower.rest.client.generator.core.Client;
 import com.opower.rest.client.generator.core.ResourceInterface;
 import com.opower.rest.client.generator.core.UriProvider;
+import com.opower.rest.client.generator.extractors.ClientErrorHandler;
+import com.opower.rest.client.generator.hystrix.HystrixClientErrorHandler.BadRequestCriteria;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -50,6 +53,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
     protected final Map<Method, HystrixCommandProperties.Setter> commandPropertiesMap;
     protected Map<Method, HystrixCommandKey> commandKeyMap;
 
+    private Map<Method, BadRequestCriteria> badRequestCriteriaMap = ImmutableMap.of();
     /**
      * Creates a HystrixClientBuilder with the default HystrixCommand.Setter based on the ResourceClass name.
      *
@@ -97,7 +101,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
 
     @SuppressWarnings("unchecked")
     private <P> B applyCallback(Map<Method, P> map, Method method, ConfigurationCallback<P> callback) {
-        if (map.containsKey(checkNotNull(method))) {
+        if (map.containsKey(checkMethod(method))) {
             checkNotNull(callback).configure(map.get(method));
         } else {
             throw new IllegalArgumentException(String.format("Method %s is not a method on the ResourceInterface", method));
@@ -113,7 +117,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
      * @return the HystrixClientBuilder
      */
     public B methodProperties(Method method, ConfigurationCallback<HystrixCommandProperties.Setter> callback) {
-        return applyCallback(this.commandPropertiesMap, method, callback);
+        return applyCallback(this.commandPropertiesMap, checkMethod(method), callback);
     }
 
     /**
@@ -139,7 +143,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
      */
     public B methodThreadPoolProperties(Method method,
                                         ConfigurationCallback<HystrixThreadPoolProperties.Setter> callback) {
-        return applyCallback(this.threadPoolPropertiesMap, method, callback);
+        return applyCallback(this.threadPoolPropertiesMap, checkMethod(method), callback);
     }
 
     /**
@@ -167,7 +171,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
     public B methodCommandKey(Method method, HystrixCommandKey commandKey) {
         this.commandKeyMap = ImmutableMap.<Method, HystrixCommandKey>builder()
                                          .putAll(this.commandKeyMap)
-                                         .put(method,
+                                         .put(checkMethod(method),
                                               commandKey)
                                          .build();
         return (B) this;
@@ -182,9 +186,47 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
      */
     @SuppressWarnings("unchecked")
     public B methodFallback(Method method, Callable<?> fallback) {
-        this.fallbackMap = ImmutableMap.<Method, Callable<?>>builder().putAll(this.fallbackMap).put(method, fallback).build();
+        this.fallbackMap = ImmutableMap.<Method, Callable<?>>builder()
+                .putAll(this.fallbackMap).put(checkMethod(method), fallback).build();
         this.commandPropertiesMap.get(method).withFallbackEnabled(true);
         return (B) this;
+    }
+
+    /**
+     * Specify specific criteria for bad requests for a particular method on the ResourceClass.
+     *
+     * @param method   the method that this fallback is to be used for
+     * @param badRequestCriteria the criteria to use
+     * @return the HystrixClientBuilder
+     */
+    @SuppressWarnings("unchecked")
+    public B methodBadRequestCriteria(Method method, BadRequestCriteria badRequestCriteria) {
+        ImmutableMap.Builder<Method, BadRequestCriteria> builder = ImmutableMap.builder();
+        builder.putAll(this.badRequestCriteriaMap).put(checkMethod(method), checkNotNull(badRequestCriteria));
+        this.badRequestCriteriaMap = builder.build();
+        return (B) this;
+    }
+
+    /**
+     * Specify default criteria for bad requests on the ResourceClass.
+     *
+     * @param badRequestCriteria the criteria to use
+     * @return the HystrixClientBuilder
+     */
+    @SuppressWarnings("unchecked")
+    public B badRequestCriteria(BadRequestCriteria badRequestCriteria) {
+        checkNotNull(badRequestCriteria);
+        ImmutableMap.Builder<Method, BadRequestCriteria> builder = ImmutableMap.builder();
+        for (Method method : this.resourceInterface.getInterface().getMethods()) {
+            builder.put(method, badRequestCriteria);
+        }
+        this.badRequestCriteriaMap = builder.build();
+        return (B) this;
+    }
+
+    @Override
+    protected ClientErrorHandler getClientErrorHandler() {
+        return new HystrixClientErrorHandler(this.badRequestCriteriaMap, super.getClientErrorHandler());
     }
 
     @Override
@@ -214,6 +256,17 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
                 });
     }
 
+    /**
+     * Ensures that the provided method is from the resource interface.
+     * @param method the method in question
+     * @return the method for convenience
+     */
+    protected Method checkMethod(Method method) {
+        checkArgument(method != null && method.getDeclaringClass().equals(this.resourceInterface.getInterface()),
+                String.format("Only methods from the resource interface %s are valid",
+                this.resourceInterface.getInterface().getCanonicalName()));
+        return method;
+    }
 
     /**
      * ClientBuilder that adds basic Hystrix capabilities to each client instance. The resulting client will use the provided

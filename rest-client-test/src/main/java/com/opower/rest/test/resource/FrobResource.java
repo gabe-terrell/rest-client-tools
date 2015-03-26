@@ -84,9 +84,10 @@ public interface FrobResource {
 
     /**
      * Used for testing logic in ClientErrorHandler.
+     * @param status the status code you want on the response
      * @return a dummy Frob
      */
     @GET
     @Path("errorcode")
-    Frob frobErrorResponse();
+    Frob frobErrorResponse(@QueryParam("status")int status);
 }

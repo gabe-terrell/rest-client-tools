@@ -15,15 +15,15 @@
 package com.opower.rest.client.generator.core;
 
 import com.google.common.base.Predicate;
+import com.opower.rest.client.generator.extractors.ClientErrorHandler;
+import com.opower.rest.client.generator.extractors.DefaultClientErrorHandler;
 import com.opower.rest.client.generator.extractors.DefaultEntityExtractorFactory;
 import com.opower.rest.client.generator.util.IsHttpMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.opower.rest.client.generator.util.HttpResponseCodes.SC_BAD_REQUEST;
 
 /**
  * Base class to make the return types of the inherited builders work correctly.
@@ -39,15 +40,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class Client<T, B extends Client<T, B>> {
 
-    protected static final Predicate<Integer> DEFAULT_ERROR_STATUS_CRITERIA = new Predicate<Integer>() {
+    public static final Predicate<Integer> DEFAULT_ERROR_STATUS_CRITERIA = new Predicate<Integer>() {
         @Override
         public boolean apply(Integer status) {
             checkNotNull(status);
-            return status >= BAD_REQUEST && status <= NETWORK_CONNECT_TIMEOUT;
+            return status >= SC_BAD_REQUEST && status <= NETWORK_CONNECT_TIMEOUT;
         }
     };
 
-    protected static final int BAD_REQUEST = 400;
     protected static final int NETWORK_CONNECT_TIMEOUT = 599;
 
     private final ConcurrentMap<Method, Predicate<Integer>> errorStatusCriteria = new ConcurrentHashMap<>();
@@ -126,8 +126,12 @@ public abstract class Client<T, B extends Client<T, B>> {
             throw new IllegalArgumentException("you must specify a MessageBodyWriter and a MessageBodyReader for serialization");
 
         final ProxyConfig config = new ProxyConfig(this.loader, this.executor, this.clientProviders, new DefaultEntityExtractorFactory(),
-                                                   this.clientErrorInterceptors, this.errorStatusCriteria);
+                                                   this.errorStatusCriteria, getClientErrorHandler());
         return createProxy(this.resourceInterface.getInterface(), this.uriProvider, config);
+    }
+
+    protected ClientErrorHandler getClientErrorHandler() {
+        return new DefaultClientErrorHandler(this.clientErrorInterceptors);
     }
 
     @SuppressWarnings("unchecked")

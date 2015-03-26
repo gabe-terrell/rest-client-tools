@@ -14,14 +14,12 @@
  **/
 package com.opower.rest.client.generator.core;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
+import com.opower.rest.client.generator.extractors.ClientErrorHandler;
 import com.opower.rest.client.generator.extractors.EntityExtractorFactory;
 
 import javax.ws.rs.ext.Providers;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,18 +30,20 @@ public class ProxyConfig {
     private final ClientExecutor executor;
     private final Providers providers;
     private final EntityExtractorFactory extractorFactory;
-    private final List<ClientErrorInterceptor> clientErrorInterceptors;
     private final ConcurrentMap<Method, Predicate<Integer>> errorStatusCriteria;
 
+    private final ClientErrorHandler clientErrorHandler;
+
     public ProxyConfig(ClassLoader loader, ClientExecutor executor, Providers providers,
-                       EntityExtractorFactory extractorFactory, List<ClientErrorInterceptor> clientErrorInterceptors,
-                       ConcurrentMap<Method, Predicate<Integer>> errorStatusCriteria) {
+                       EntityExtractorFactory extractorFactory,
+                       ConcurrentMap<Method, Predicate<Integer>> errorStatusCriteria,
+                       ClientErrorHandler clientErrorHandler) {
         this.loader = checkNotNull(loader);
         this.executor = checkNotNull(executor);
         this.providers = checkNotNull(providers);
         this.extractorFactory = checkNotNull(extractorFactory);
-        this.clientErrorInterceptors = Optional.fromNullable(clientErrorInterceptors).or(Lists.<ClientErrorInterceptor>newArrayList());
         this.errorStatusCriteria = checkNotNull(errorStatusCriteria);
+        this.clientErrorHandler = checkNotNull(clientErrorHandler);
     }
 
     public ClassLoader getLoader() {
@@ -62,8 +62,8 @@ public class ProxyConfig {
         return extractorFactory;
     }
 
-    public List<ClientErrorInterceptor> getClientErrorInterceptors() {
-        return clientErrorInterceptors;
+    public ClientErrorHandler getClientErrorHandler() {
+        return clientErrorHandler;
     }
 
     public ConcurrentMap<Method, Predicate<Integer>> getErrorStatusCriteria() {
