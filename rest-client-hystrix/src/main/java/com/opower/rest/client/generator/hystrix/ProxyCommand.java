@@ -17,6 +17,8 @@ package com.opower.rest.client.generator.hystrix;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.netflix.hystrix.HystrixCommand;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
@@ -59,7 +61,11 @@ final class ProxyCommand extends HystrixCommand {
 
     @Override
     protected Object run() throws Exception {
-        return this.toinvoke.invoke(this.target, this.args);
+        try {
+            return this.toinvoke.invoke(this.target, this.args);
+        } catch (InvocationTargetException ex) {
+            throw Throwables.propagate(ex.getTargetException());
+        }
     }
 
     @Override

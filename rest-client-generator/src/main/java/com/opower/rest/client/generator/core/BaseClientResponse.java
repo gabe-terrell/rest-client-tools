@@ -334,6 +334,10 @@ public class BaseClientResponse extends ClientResponse {
         }
     }
 
+    public boolean isSuccessful() {
+        return !this.errorStatusCriteria.apply(this.getStatus());
+    }
+
     public ClientResponseFailure createResponseFailure(String message) {
         return createResponseFailure(message, null);
     }

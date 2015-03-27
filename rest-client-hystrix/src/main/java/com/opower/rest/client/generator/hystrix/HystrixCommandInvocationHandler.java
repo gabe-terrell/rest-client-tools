@@ -15,6 +15,7 @@
 package com.opower.rest.client.generator.hystrix;
 
 import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -94,6 +95,8 @@ final class HystrixCommandInvocationHandler<T> implements InvocationHandler {
     static Object execute(HystrixCommand command) throws Throwable {
         try {
             return command.execute();
+        } catch (HystrixBadRequestException ex) {
+            throw ex.getCause();
         } catch (HystrixRuntimeException ex) {
             // fallback failures should always just throw the HystrixRuntimeException
             if (ex.getFallbackException() != null) {

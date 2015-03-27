@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.junit.Test;
 
 import static com.opower.rest.client.generator.core.Client.DEFAULT_ERROR_STATUS_CRITERIA;
-import static com.opower.rest.client.generator.core.Client.BAD_REQUEST;
 import static com.opower.rest.client.generator.core.Client.NETWORK_CONNECT_TIMEOUT;
+import static com.opower.rest.client.generator.util.HttpResponseCodes.SC_BAD_REQUEST;
+import static com.opower.rest.client.generator.util.HttpResponseCodes.SC_OK;
+import static com.opower.rest.client.generator.util.HttpResponseCodes.SC_NOT_FOUND;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -19,7 +20,6 @@ import static org.junit.Assert.fail;
  */
 public class TestBaseClientResponse {
 
-    private static final int SC_OK = 200;
     private static final int END_OF_REDIRECTION_RANGE = 399;
 
     /**
@@ -31,7 +31,7 @@ public class TestBaseClientResponse {
         Predicate<Integer> t = new Predicate<Integer>() {
             @Override
             public boolean apply(Integer status) {
-                return 404 != status && status >= BAD_REQUEST && status <= NETWORK_CONNECT_TIMEOUT;
+                return SC_NOT_FOUND != status && status >= SC_BAD_REQUEST && status <= NETWORK_CONNECT_TIMEOUT;
             }
         };
 
@@ -40,7 +40,7 @@ public class TestBaseClientResponse {
         blah.checkFailureStatus();
 
         BaseClientResponse response = new BaseClientResponse(null, DEFAULT_ERROR_STATUS_CRITERIA);
-        for (int i = BAD_REQUEST; i <= NETWORK_CONNECT_TIMEOUT; i++) {
+        for (int i = SC_BAD_REQUEST; i <= NETWORK_CONNECT_TIMEOUT; i++) {
             try {
                 response.setStatus(i);
                 response.checkFailureStatus();

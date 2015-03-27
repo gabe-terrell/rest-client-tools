@@ -14,15 +14,19 @@
  **/
 package com.opower.rest.client.generator.extractors;
 
+import com.google.common.base.Throwables;
 import com.opower.rest.client.generator.core.BaseClientResponse;
 import com.opower.rest.client.generator.core.ClientResponse;
 import com.opower.rest.client.generator.core.ClientResponseFailure;
 import com.opower.rest.client.generator.util.Types;
 
 import javax.ws.rs.core.Response;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Solomon.Duskis
@@ -49,33 +53,31 @@ public class DefaultEntityExtractorFactory implements EntityExtractorFactory {
         };
     }
 
-    public static final EntityExtractor createVoidExtractor(final boolean release) {
+    public static final EntityExtractor createVoidExtractor(final Method method, final boolean release) {
+        checkNotNull(method);
         return new EntityExtractor() {
             public Object extractEntity(ClientRequestContext context, Object... args) {
-                try {
-                    context.getClientResponse().checkFailureStatus();
-                } catch (ClientResponseFailure ce) {
-                    // If ClientResponseFailure do a copy of the response and then release the connection,
-                    // we need to use the copy here and not the original response
-                    context.getErrorHandler().clientErrorHandling((BaseClientResponse) ce.getResponse(), ce);
-                } catch (RuntimeException e) {
-                    context.getErrorHandler().clientErrorHandling(context.getClientResponse(), e);
-                }
-                if (release)
+                handleResponseErrors(method, context);
+                if (release) {
                     context.getClientResponse().releaseConnection();
+                }
                 return null;
             }
         };
     }
 
     public EntityExtractor createExtractor(final Method method) {
+        checkNotNull(method);
         final Class returnType = method.getReturnType();
-        if (isVoidReturnType(returnType))
-            return createVoidExtractor(true);
-        if (returnType.equals(Response.Status.class))
+        if (isVoidReturnType(returnType)) {
+            return createVoidExtractor(method, true);
+        }
+        if (returnType.equals(Response.Status.class)) {
             return createStatusExtractor(true);
-        if (Response.class.isAssignableFrom(returnType) || returnType.getCanonicalName().equals("javax.ws.rs.core.Response"))
+        }
+        if (Response.class.isAssignableFrom(returnType) || returnType.getCanonicalName().equals("javax.ws.rs.core.Response")) {
             return createResponseTypeEntityExtractor(method);
+        }
 
         // We are not a ClientResponse type so we need to unmarshall and narrow it
         // to right type. If we are unable to unmarshall, or encounter any kind of
@@ -86,8 +88,6 @@ public class DefaultEntityExtractorFactory implements EntityExtractorFactory {
     }
 
     protected EntityExtractor createResponseTypeEntityExtractor(final Method method) {
-
-
         final Type methodGenericReturnType = method.getGenericReturnType();
         if (methodGenericReturnType instanceof ParameterizedType) {
             final ParameterizedType zType = (ParameterizedType) methodGenericReturnType;
@@ -95,6 +95,7 @@ public class DefaultEntityExtractorFactory implements EntityExtractorFactory {
             final Class<?> responseReturnType = Types.getRawType(genericReturnType);
             return new EntityExtractor() {
                 public Object extractEntity(ClientRequestContext context, Object... args) {
+                    handleResponseErrors(method, context);
                     context.getClientResponse().setReturnType(responseReturnType);
                     context.getClientResponse().setGenericReturnType(genericReturnType);
                     return context.getClientResponse();
@@ -102,6 +103,20 @@ public class DefaultEntityExtractorFactory implements EntityExtractorFactory {
             };
         } else {
             return clientResponseExtractor;
+        }
+    }
+
+    protected static void handleResponseErrors(Method method, ClientRequestContext context) {
+        checkNotNull(method);
+        final BaseClientResponse response = context.getClientResponse();
+        try {
+            response.checkFailureStatus();
+        } catch (ClientResponseFailure ce) {
+            // If ClientResponseFailure do a copy of the response and then release the connection,
+            // we need to use the copy here and not the original response
+            context.getErrorHandler().clientErrorHandling(method, (BaseClientResponse) ce.getResponse(), ce);
+        } catch (RuntimeException e) {
+            context.getErrorHandler().clientErrorHandling(method, response, e);
         }
     }
 

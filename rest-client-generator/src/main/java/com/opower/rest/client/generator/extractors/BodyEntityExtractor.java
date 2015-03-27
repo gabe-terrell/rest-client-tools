@@ -14,11 +14,14 @@
  **/
 package com.opower.rest.client.generator.extractors;
 
+
 import com.opower.rest.client.generator.core.BaseClientResponse;
-import com.opower.rest.client.generator.core.ClientResponseFailure;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.opower.rest.client.generator.extractors.DefaultEntityExtractorFactory.handleResponseErrors;
 
 /**
  * BodyEntityExtractor extract body objects from responses. This ends up calling
@@ -34,36 +37,27 @@ public class BodyEntityExtractor implements EntityExtractor {
     private final Method method;
 
     public BodyEntityExtractor(Method method) {
-        this.method = method;
+        this.method = checkNotNull(method);
     }
 
     public Object extractEntity(ClientRequestContext context, Object... args) {
+        handleResponseErrors(this.method, context);
         final BaseClientResponse response = context.getClientResponse();
-        try {
-            response.checkFailureStatus();
-        } catch (ClientResponseFailure ce) {
-            // If ClientResponseFailure do a copy of the response and then release the connection,
-            // we need to use the copy here and not the original response
-            context.getErrorHandler().clientErrorHandling((BaseClientResponse) ce.getResponse(), ce);
-        } catch (RuntimeException e) {
-            context.getErrorHandler().clientErrorHandling(response, e);
-        }
-
         // only release connection if it is not an instance of an
         // InputStream
         boolean releaseConnectionAfter = true;
         try {
             // void methods should be handled before this method gets called, but it's worth being defensive
-            if (method.getReturnType() == null) {
+            if (this.method.getReturnType() == null) {
                 throw new RuntimeException(
                         "No type information to extract entity with.  You use other getEntity() methods");
             }
-            Object obj = response.getEntity(method.getReturnType(), method.getGenericReturnType());
+            Object obj = response.getEntity(this.method.getReturnType(), this.method.getGenericReturnType());
             if (obj instanceof InputStream)
                 releaseConnectionAfter = false;
             return obj;
         } catch (RuntimeException e) {
-            context.getErrorHandler().clientErrorHandling(response, e);
+            context.getErrorHandler().clientErrorHandling(this.method, response, e);
         } finally {
             if (releaseConnectionAfter)
                 response.releaseConnection();
