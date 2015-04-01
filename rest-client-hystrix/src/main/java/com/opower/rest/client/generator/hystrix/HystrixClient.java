@@ -29,6 +29,7 @@ import com.opower.rest.client.generator.core.UriProvider;
 import com.opower.rest.client.generator.extractors.ClientErrorHandler;
 import com.opower.rest.client.generator.hystrix.HystrixClientErrorHandler.BadRequestCriteria;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -53,7 +54,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
     protected final Map<Method, HystrixCommandProperties.Setter> commandPropertiesMap;
     protected Map<Method, HystrixCommandKey> commandKeyMap;
 
-    private Map<Method, BadRequestCriteria> badRequestCriteriaMap = ImmutableMap.of();
+    Map<Method, BadRequestCriteria> badRequestCriteriaMap = ImmutableMap.of();
     /**
      * Creates a HystrixClientBuilder with the default HystrixCommand.Setter based on the ResourceClass name.
      *
@@ -169,11 +170,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
      */
     @SuppressWarnings("unchecked")
     public B methodCommandKey(Method method, HystrixCommandKey commandKey) {
-        this.commandKeyMap = ImmutableMap.<Method, HystrixCommandKey>builder()
-                                         .putAll(this.commandKeyMap)
-                                         .put(checkMethod(method),
-                                              commandKey)
-                                         .build();
+        this.commandKeyMap = updateWith(method, commandKey, this.commandKeyMap);
         return (B) this;
     }
 
@@ -186,8 +183,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
      */
     @SuppressWarnings("unchecked")
     public B methodFallback(Method method, Callable<?> fallback) {
-        this.fallbackMap = ImmutableMap.<Method, Callable<?>>builder()
-                .putAll(this.fallbackMap).put(checkMethod(method), fallback).build();
+        this.fallbackMap = updateWith(method, fallback, this.fallbackMap);
         this.commandPropertiesMap.get(method).withFallbackEnabled(true);
         return (B) this;
     }
@@ -201,9 +197,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
      */
     @SuppressWarnings("unchecked")
     public B methodBadRequestCriteria(Method method, BadRequestCriteria badRequestCriteria) {
-        ImmutableMap.Builder<Method, BadRequestCriteria> builder = ImmutableMap.builder();
-        builder.putAll(this.badRequestCriteriaMap).put(checkMethod(method), checkNotNull(badRequestCriteria));
-        this.badRequestCriteriaMap = builder.build();
+        this.badRequestCriteriaMap = updateWith(method, badRequestCriteria, this.badRequestCriteriaMap);
         return (B) this;
     }
 
@@ -222,6 +216,12 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
         }
         this.badRequestCriteriaMap = builder.build();
         return (B) this;
+    }
+
+    private <V> Map<Method, V> updateWith(Method key, V value, Map<Method, V> existing) {
+        Map<Method, V> updated = new HashMap<>(existing);
+        updated.put(checkMethod(key), checkNotNull(value));
+        return ImmutableMap.copyOf(updated);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.opower.rest.client.generator.hystrix;
 
+import com.google.auto.value.AutoValue;
 import com.netflix.hystrix.HystrixCommandGroupKey;
-import com.netflix.hystrix.HystrixCommandProperties;
-import com.opower.rest.client.ConfigurationCallback;
+import com.netflix.hystrix.HystrixCommandKey;
 import com.opower.rest.client.generator.core.BaseClientResponse;
 import com.opower.rest.client.generator.core.ResourceInterface;
 import com.opower.rest.client.generator.core.SimpleUriProvider;
@@ -26,6 +26,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestHystrixClientBuilder {
 
+    private static final String TEST_KEY_1 = "test-key-1";
+    private static final String TEST_KEY_2 = "test-key-2";
     private static final UriProvider URI_PROVIDER = new SimpleUriProvider("http://localhost");
     static final HystrixCommandGroupKey GROUP_KEY = HystrixCommandGroupKey.Factory.asKey("test");
     private static final ResourceInterface<FrobResource> RESOURCE_INTERFACE = new ResourceInterface<>(FrobResource.class);
@@ -95,6 +97,69 @@ public class TestHystrixClientBuilder {
         assertThat(criteriaMap.size(), is(methods.length));
     }
 
+    /**
+     * Multiple calls to set the same criteria should just let the last one win.
+     */
+    @Test
+    public void replaceBadRequestCriteria() {
+        SimpleCriteria criteria1 = SimpleCriteria.create("1");
+        SimpleCriteria criteria2 = SimpleCriteria.create("2");
+
+        builder.methodBadRequestCriteria(FROB_METHOD, criteria1);
+        builder.methodBadRequestCriteria(FROB_METHOD, criteria2);
+
+        assertThat(builder.badRequestCriteriaMap.get(FROB_METHOD), is((BadRequestCriteria)criteria2));
+    }
+
+    /**
+     * Setting the CommandKey multiple times should just let the last one win.
+     */
+    @Test
+    public void replaceCommandKey() {
+        builder.methodCommandKey(FROB_METHOD, HystrixCommandKey.Factory.asKey(TEST_KEY_1));
+        builder.methodCommandKey(FROB_METHOD, HystrixCommandKey.Factory.asKey(TEST_KEY_2));
+
+        assertThat(builder.commandKeyMap.get(FROB_METHOD).name(), is(TEST_KEY_2));
+    }
+
+    @Test
+    public void replaceFallback() {
+        SimpleFallback fallback1 = SimpleFallback.create(TEST_KEY_1);
+        SimpleFallback fallback2 = SimpleFallback.create(TEST_KEY_2);
+
+        builder.methodFallback(FROB_METHOD, fallback1);
+        builder.methodFallback(FROB_METHOD, fallback2);
+
+        assertThat(builder.fallbackMap.get(FROB_METHOD), is((Callable)fallback2));
+    }
+
+    @AutoValue
+    abstract static class SimpleFallback implements Callable<Object> {
+        static SimpleFallback create(String name) {
+            return new AutoValue_TestHystrixClientBuilder_SimpleFallback(name);
+        }
+
+        @Override
+        public Object call() {
+            return new Object();
+        }
+
+        abstract String name();
+    }
+
+    @AutoValue
+    abstract static class SimpleCriteria implements BadRequestCriteria {
+        static SimpleCriteria create(String name) {
+            return new AutoValue_TestHystrixClientBuilder_SimpleCriteria(name);
+        }
+
+        @Override
+        public boolean apply(BaseClientResponse response, Exception exception) {
+            return false;
+        }
+
+        abstract String name();
+    }
     /**
      * To make sure that sub-interfaces can be used.
      */
