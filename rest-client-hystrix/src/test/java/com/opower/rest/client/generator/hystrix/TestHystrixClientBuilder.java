@@ -1,6 +1,8 @@
 package com.opower.rest.client.generator.hystrix;
 
 import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandProperties;
+import com.opower.rest.client.ConfigurationCallback;
 import com.opower.rest.client.generator.core.BaseClientResponse;
 import com.opower.rest.client.generator.core.ResourceInterface;
 import com.opower.rest.client.generator.core.SimpleUriProvider;
@@ -9,6 +11,7 @@ import com.opower.rest.client.generator.hystrix.HystrixClientErrorHandler.BadReq
 import com.opower.rest.test.resource.FrobResource;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,6 +55,18 @@ public class TestHystrixClientBuilder {
     }
 
     @Test
+    public void subInterfaceIsValid() {
+        HystrixClient.Builder<FrobResource> builder =
+                new HystrixClient.Builder<>(new ResourceInterface<>(SpecialFrobResource.class), URI_PROVIDER, GROUP_KEY);
+        builder.methodFallback(FROB_METHOD, new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                return null;
+            }
+        });
+    }
+
+    @Test
     public void setMethodCriteria() {
         builder.methodBadRequestCriteria(FROB_METHOD, new BadRequestCriteria() {
             @Override
@@ -78,5 +93,12 @@ public class TestHystrixClientBuilder {
             assertTrue(criteriaMap.containsKey(method));
         }
         assertThat(criteriaMap.size(), is(methods.length));
+    }
+
+    /**
+     * To make sure that sub-interfaces can be used.
+     */
+    private interface SpecialFrobResource extends FrobResource{
+
     }
 }

@@ -262,7 +262,7 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
      * @return the method for convenience
      */
     protected Method checkMethod(Method method) {
-        checkArgument(method != null && method.getDeclaringClass().equals(this.resourceInterface.getInterface()),
+        checkArgument(method != null && method.getDeclaringClass().isAssignableFrom(this.resourceInterface.getInterface()),
                 String.format("Only methods from the resource interface %s are valid",
                 this.resourceInterface.getInterface().getCanonicalName()));
         return method;
