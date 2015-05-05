@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.ws.rs.Path;
+import javax.ws.rs.ext.Providers;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -117,6 +118,17 @@ public abstract class Client<T, B extends Client<T, B>> {
     public B registerProviderInstance(Object provider) {
         this.clientProviders.registerProviderInstance(provider);
         return (B) this;
+    }
+
+    /**
+     * Get holder of registered providers. This is mutable structure, so some instances may be added after finalizing client
+     * builder work. Useful when you need to register provider (message body reader or writer) that relies on other
+     * providers (e.g. MultipartFormAnnotationWriter).
+     * 
+     * @return holder of registered providers
+     */
+    public Providers getClientProviders() {
+        return this.clientProviders;
     }
 
     public T build() {
