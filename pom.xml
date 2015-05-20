@@ -10,7 +10,7 @@
 
     <groupId>com.opower</groupId>
     <artifactId>rest-client-tools</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.2.1</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -34,7 +34,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:opower/rest-client-tools.git</connection>
-        <tag>HEAD</tag>
+        <tag>1.2.1</tag>
         <developerConnection>scm:git:git@github.com:opower/rest-client-tools.git</developerConnection>
     </scm>
 
