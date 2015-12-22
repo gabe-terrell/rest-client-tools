@@ -104,7 +104,8 @@ public abstract class HystrixClient<T, B extends HystrixClient<T, B>> extends Cl
     private <P> B applyCallback(Map<Method, P> map, Method method, ConfigurationCallback<P> callback) {
         if (map.containsKey(checkMethod(method))) {
             checkNotNull(callback).configure(map.get(method));
-        } else {
+        } 
+        else {
             throw new IllegalArgumentException(String.format("Method %s is not a method on the ResourceInterface", method));
         }
         return (B) this;

@@ -49,7 +49,7 @@ public class HystrixFrobClientLoader implements FrobClientLoader {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Override
-    public Map<String,FrobResource> clientsToTest(final int port, String type) {
+    public Map<String, FrobResource> clientsToTest(final int port, String type) {
         try {
             HystrixClient.Builder<FrobResource> clientBuilder = new HystrixClient.Builder<FrobResource>(
                     new ResourceInterface<>(FrobResource.class),
@@ -65,7 +65,8 @@ public class HystrixFrobClientLoader implements FrobClientLoader {
                     .registerProviderInstance(JACKSON_JSON_PROVIDER);
 
             return ImmutableMap.of("default", clientBuilder.build());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw Throwables.propagate(ex);
         }
     }

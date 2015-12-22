@@ -34,11 +34,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
+ * Integration tests for Hystrix error handling.
+ *
  * @author chris.phillips
  */
 public class HystrixErrorHandlingIntTest {
 
-    private static int PORT = 7999;
+    private static final int PORT = 7999;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .setDateFormat(new ISO8601DateFormat())
@@ -77,9 +79,10 @@ public class HystrixErrorHandlingIntTest {
     public void nonClientResponseFailureThrowsOriginalException() throws Exception {
         Method frobJsonErrorMethod = FrobResource.class.getMethod("frobJsonError");
         try {
-            frobResource.frobJsonError();
+            this.frobResource.frobJsonError();
             fail();
-        } catch(RuntimeException ex) {
+        } 
+        catch (RuntimeException ex) {
             assertTrue(ex.getCause() instanceof JsonMappingException);
             HystrixCommandMetrics metrics = HystrixCommandMetrics.getInstance(HystrixClient.keyForMethod(frobJsonErrorMethod));
             assertThat(metrics.getCumulativeCount(HystrixRollingNumberEvent.FAILURE), is(0L));
@@ -101,15 +104,18 @@ public class HystrixErrorHandlingIntTest {
         metricsTest(frobErrorResponseMethod, HttpResponseCodes.SC_BAD_REQUEST, 1L, 2L);
     }
 
-    private void metricsTest(Method method, int statusCode, long expectedFailureCount, long expectedExceptionThrownCount) throws Exception {
+    private void metricsTest(Method method, int statusCode, long expectedFailureCount, long expectedExceptionThrownCount)
+        throws Exception {
         try {
-            frobResource.frobErrorResponse(statusCode);
+            this.frobResource.frobErrorResponse(statusCode);
             fail();
-        } catch(StatusCodeMatcher.ResponseError ex) {
+        }
+        catch (StatusCodeMatcher.ResponseError ex) {
             HystrixCommandMetrics metrics = HystrixCommandMetrics.getInstance(HystrixClient.keyForMethod(method));
             assertThat(ex.getClientResponse().getStatus(), is(statusCode));
             assertThat(metrics.getCumulativeCount(HystrixRollingNumberEvent.FAILURE), is(expectedFailureCount));
-            assertThat(metrics.getCumulativeCount(HystrixRollingNumberEvent.EXCEPTION_THROWN), is(expectedExceptionThrownCount));
+            assertThat(metrics.getCumulativeCount(HystrixRollingNumberEvent.EXCEPTION_THROWN),
+                       is(expectedExceptionThrownCount));
         }
     }
 

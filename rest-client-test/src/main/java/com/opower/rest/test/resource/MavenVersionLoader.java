@@ -49,7 +49,8 @@ public class MavenVersionLoader {
                 p.load(is);
                 v = p.getProperty("version", "");
             }
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             // ignore
         }
 

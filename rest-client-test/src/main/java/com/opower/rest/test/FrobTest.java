@@ -114,7 +114,8 @@ public abstract class FrobTest {
                 try {
                     assertThat(CharStreams.toString(new InputStreamReader((InputStream) response.getEntity(),
                                                                                   Charsets.UTF_8)), is("success"));
-                } catch (IOException e) {
+                } 
+                catch (IOException e) {
                     Throwables.propagate(e);
                 }
             }

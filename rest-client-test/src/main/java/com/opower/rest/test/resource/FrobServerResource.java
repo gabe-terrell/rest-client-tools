@@ -43,7 +43,8 @@ public class FrobServerResource implements FrobResource {
 
         try {
             return FROBS.get(checkNotNull(frobId));
-        } catch (ExecutionException e) {
+        } 
+        catch (ExecutionException e) {
             throw Throwables.propagate(e);
         }
     }
@@ -53,7 +54,8 @@ public class FrobServerResource implements FrobResource {
 
         try {
             return FROBS.get(checkNotNull(frobId));
-        } catch (ExecutionException e) {
+        } 
+        catch (ExecutionException e) {
             throw Throwables.propagate(e);
         }
     }
