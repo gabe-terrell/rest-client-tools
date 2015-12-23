@@ -35,7 +35,9 @@ public class Frob {
     private Integer counter = new Random(MAX_RAND).nextInt();
 
     @JsonProperty
-    private Optional<Long> optionalField = this.counter < HALF_MAX ? Optional.<Long>absent() : Optional.of(new Random().nextLong());
+    private Optional<Long> optionalField = this.counter < HALF_MAX
+                                           ? Optional.<Long> absent()
+                                           : Optional.of(new Random().nextLong());
 
     @JsonProperty
     private LocalDate localDate = new LocalDate();

@@ -49,7 +49,8 @@ public class FrobClientRule extends ExternalResource {
         List<FrobClientLoader> factories = Lists.newArrayList(factoryIterator);
         if (factories.size() == 0) {
             throw new IllegalStateException("No FrobClientLoader detected on classpath.");
-        } else {
+        } 
+        else {
             return factories.get(0);
         }
     }

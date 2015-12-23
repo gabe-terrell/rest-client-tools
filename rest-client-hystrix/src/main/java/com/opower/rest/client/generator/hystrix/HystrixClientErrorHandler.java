@@ -47,7 +47,8 @@ public class HystrixClientErrorHandler implements ClientErrorHandler {
         try {
             this.clientErrorHandler.clientErrorHandling(method, clientResponse, e);
             checkForBadRequest(method, clientResponse, e);
-        } catch (Exception ex) {
+        } 
+        catch (Exception ex) {
             checkForBadRequest(method, clientResponse, ex);
         }
     }
@@ -56,13 +57,15 @@ public class HystrixClientErrorHandler implements ClientErrorHandler {
         BadRequestCriteria criteria;
         if (method != null) {
             criteria = Optional.fromNullable(this.badRequestCriteriaMap.get(method)).or(DEFAULT_BAD_REQUEST_CRITERIA);
-        } else {
+        } 
+        else {
             criteria = DEFAULT_BAD_REQUEST_CRITERIA;
         }
 
         if (criteria.apply(clientResponse, ex) || (clientResponse != null && clientResponse.isSuccessful())) {
             throw new HystrixBadRequestException("Bad Request", ex);
-        } else {
+        } 
+        else {
             Throwables.propagate(ex);
         }
     }

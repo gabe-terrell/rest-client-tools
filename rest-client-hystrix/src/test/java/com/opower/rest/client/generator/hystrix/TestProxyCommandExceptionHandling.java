@@ -144,7 +144,7 @@ public class TestProxyCommandExceptionHandling {
             }
         });
         
-        int result = (int)HystrixCommandInvocationHandler.execute(command);
+        int result = (int) HystrixCommandInvocationHandler.execute(command);
         assertThat(result, is(0));
     }
 
@@ -217,7 +217,7 @@ public class TestProxyCommandExceptionHandling {
         this.testRuleExpectedException.expect(IllegalStateException.class);
         this.testRuleExpectedException.expectMessage(EXCEPTION_MESSAGE);
 
-        HystrixCommandInvocationHandler.execute(command);    
+        HystrixCommandInvocationHandler.execute(command);
     }
 
     /**
@@ -229,7 +229,7 @@ public class TestProxyCommandExceptionHandling {
         
         public TestCommand() {
             super(HystrixCommand.Setter.withGroupKey(TEST_GROUP).andCommandKey(TEST_CMD));
-            setTimeout((int)TimeUnit.SECONDS.toMillis(1));
+            setTimeout((int) TimeUnit.SECONDS.toMillis(1));
             setForceCircuitOpen(false);
             setFallback(new Callable<Object>() {
                 @Override
@@ -252,11 +252,11 @@ public class TestProxyCommandExceptionHandling {
         private void setProp(String name, Object value) {
             Properties props = new Properties();
             props.put(name, value);
-            ConfigurationManager.loadProperties(props);    
+            ConfigurationManager.loadProperties(props);
         }
         
         public void setTimeout(int timeoutInMillis) {
-            setProp(propName(".execution.isolation.thread.timeoutInMilliseconds"), timeoutInMillis);   
+            setProp(propName(".execution.isolation.thread.timeoutInMilliseconds"), timeoutInMillis);
         }
         
         public void setForceCircuitOpen(boolean forceCircuitOpen) {
@@ -281,7 +281,8 @@ public class TestProxyCommandExceptionHandling {
         protected Object getFallback() {
             try {
                 return this.fallback.get().call();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 throw Throwables.propagate(e);
             }
         }

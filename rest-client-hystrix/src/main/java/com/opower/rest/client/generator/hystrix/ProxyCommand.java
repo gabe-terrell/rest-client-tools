@@ -51,7 +51,8 @@ final class ProxyCommand extends HystrixCommand {
         this.args = args;
         this.target = target;
         this.fallback = Optional.fromNullable(fallback);
-        checkArgument(toinvoke.getDeclaringClass().isInstance(target), "The method to invoke must be present on the target object");
+        checkArgument(toinvoke.getDeclaringClass().isInstance(target),
+                      "The method to invoke must be present on the target object");
         checkArgument(!getProperties().fallbackEnabled().get() || this.fallback.isPresent(),
                       String.format("You didn't provide a fallback for %s.%s. You must either provide a "
                                     + "fallback or disable fallbacks "
@@ -63,7 +64,8 @@ final class ProxyCommand extends HystrixCommand {
     protected Object run() throws Exception {
         try {
             return this.toinvoke.invoke(this.target, this.args);
-        } catch (InvocationTargetException ex) {
+        } 
+        catch (InvocationTargetException ex) {
             throw Throwables.propagate(ex.getTargetException());
         }
     }
@@ -73,10 +75,12 @@ final class ProxyCommand extends HystrixCommand {
         if (this.fallback.isPresent()) {
             try {
                 return this.fallback.get().call();
-            } catch (Exception e) {
+            } 
+            catch (Exception e) {
                 throw Throwables.propagate(e);
             }
-        } else {
+        } 
+        else {
             return super.getFallback();
         }
     }

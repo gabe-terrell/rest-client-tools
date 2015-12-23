@@ -14,17 +14,14 @@
  **/
 package com.opower.rest.client.generator.extractors;
 
-import com.google.common.base.Throwables;
 import com.opower.rest.client.generator.core.BaseClientResponse;
 import com.opower.rest.client.generator.core.ClientResponse;
 import com.opower.rest.client.generator.core.ClientResponseFailure;
 import com.opower.rest.client.generator.util.Types;
-
-import javax.ws.rs.core.Response;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import javax.ws.rs.core.Response;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

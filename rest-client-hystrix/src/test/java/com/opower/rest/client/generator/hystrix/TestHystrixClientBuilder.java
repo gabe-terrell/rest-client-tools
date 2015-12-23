@@ -32,35 +32,38 @@ public class TestHystrixClientBuilder {
     static final HystrixCommandGroupKey GROUP_KEY = HystrixCommandGroupKey.Factory.asKey("test");
     private static final ResourceInterface<FrobResource> RESOURCE_INTERFACE = new ResourceInterface<>(FrobResource.class);
     private static final Method FROB_METHOD = FrobResource.class.getMethods()[0];
-    private HystrixClient.Builder<FrobResource> builder = new HystrixClient.Builder<>(RESOURCE_INTERFACE, URI_PROVIDER, GROUP_KEY);
+    private HystrixClient.Builder<FrobResource> builder = new HystrixClient.Builder<>(RESOURCE_INTERFACE,
+                                                                                      URI_PROVIDER,
+                                                                                      GROUP_KEY);
     /**
      * Initializes the system property to ensure the RuntimeDelegate gets properly loaded.
      */
     @BeforeClass
     public static void init() {
-        System.setProperty("javax.ws.rs.ext.RuntimeDelegate","com.opower.rest.client.generator.core.BasicRuntimeDelegate");
+        System.setProperty("javax.ws.rs.ext.RuntimeDelegate",
+                           "com.opower.rest.client.generator.core.BasicRuntimeDelegate");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullMethod() {
-        builder.methodBadRequestCriteria(null, null);
+        this.builder.methodBadRequestCriteria(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void wrongMethod() {
-        builder.methodBadRequestCriteria(TestHystrixClientBuilder.class.getMethods()[0], null);
+        this.builder.methodBadRequestCriteria(TestHystrixClientBuilder.class.getMethods()[0], null);
     }
 
     @Test(expected = NullPointerException.class)
     public void nullCriteria() {
-        builder.methodBadRequestCriteria(FROB_METHOD, null);
+        this.builder.methodBadRequestCriteria(FROB_METHOD, null);
     }
 
     @Test
     public void subInterfaceIsValid() {
-        HystrixClient.Builder<FrobResource> builder =
+        HystrixClient.Builder<FrobResource> frobResourceBuilder =
                 new HystrixClient.Builder<>(new ResourceInterface<>(SpecialFrobResource.class), URI_PROVIDER, GROUP_KEY);
-        builder.methodFallback(FROB_METHOD, new Callable<Object>() {
+        frobResourceBuilder.methodFallback(FROB_METHOD, new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -70,26 +73,28 @@ public class TestHystrixClientBuilder {
 
     @Test
     public void setMethodCriteria() {
-        builder.methodBadRequestCriteria(FROB_METHOD, new BadRequestCriteria() {
+        this.builder.methodBadRequestCriteria(FROB_METHOD, new BadRequestCriteria() {
             @Override
             public boolean apply(BaseClientResponse response, Exception exception) {
                 return false;
             }
         });
-        Map<Method, ? extends BadRequestCriteria> criteriaMap = ((HystrixClientErrorHandler)builder.getClientErrorHandler()).getCriteriaMap();
+        Map<Method, ? extends BadRequestCriteria> criteriaMap
+                = ((HystrixClientErrorHandler) this.builder.getClientErrorHandler()).getCriteriaMap();
         assertTrue(criteriaMap.containsKey(FROB_METHOD));
         assertThat(criteriaMap.size(), is(1));
     }
 
     @Test
     public void setResourceCriteria() {
-        builder.badRequestCriteria(new BadRequestCriteria() {
+        this.builder.badRequestCriteria(new BadRequestCriteria() {
             @Override
             public boolean apply(BaseClientResponse response, Exception exception) {
                 return false;
             }
         });
-        Map<Method, ? extends BadRequestCriteria> criteriaMap = ((HystrixClientErrorHandler)builder.getClientErrorHandler()).getCriteriaMap();
+        Map<Method, ? extends BadRequestCriteria> criteriaMap
+                = ((HystrixClientErrorHandler) this.builder.getClientErrorHandler()).getCriteriaMap();
         Method[] methods = FrobResource.class.getMethods();
         for (Method method : methods) {
             assertTrue(criteriaMap.containsKey(method));
@@ -105,10 +110,10 @@ public class TestHystrixClientBuilder {
         SimpleCriteria criteria1 = SimpleCriteria.create("1");
         SimpleCriteria criteria2 = SimpleCriteria.create("2");
 
-        builder.methodBadRequestCriteria(FROB_METHOD, criteria1);
-        builder.methodBadRequestCriteria(FROB_METHOD, criteria2);
+        this.builder.methodBadRequestCriteria(FROB_METHOD, criteria1);
+        this.builder.methodBadRequestCriteria(FROB_METHOD, criteria2);
 
-        assertThat(builder.badRequestCriteriaMap.get(FROB_METHOD), is((BadRequestCriteria)criteria2));
+        assertThat(this.builder.badRequestCriteriaMap.get(FROB_METHOD), is((BadRequestCriteria) criteria2));
     }
 
     /**
@@ -116,10 +121,10 @@ public class TestHystrixClientBuilder {
      */
     @Test
     public void replaceCommandKey() {
-        builder.methodCommandKey(FROB_METHOD, HystrixCommandKey.Factory.asKey(TEST_KEY_1));
-        builder.methodCommandKey(FROB_METHOD, HystrixCommandKey.Factory.asKey(TEST_KEY_2));
+        this.builder.methodCommandKey(FROB_METHOD, HystrixCommandKey.Factory.asKey(TEST_KEY_1));
+        this.builder.methodCommandKey(FROB_METHOD, HystrixCommandKey.Factory.asKey(TEST_KEY_2));
 
-        assertThat(builder.commandKeyMap.get(FROB_METHOD).name(), is(TEST_KEY_2));
+        assertThat(this.builder.commandKeyMap.get(FROB_METHOD).name(), is(TEST_KEY_2));
     }
 
     @Test
@@ -127,10 +132,10 @@ public class TestHystrixClientBuilder {
         SimpleFallback fallback1 = SimpleFallback.create(TEST_KEY_1);
         SimpleFallback fallback2 = SimpleFallback.create(TEST_KEY_2);
 
-        builder.methodFallback(FROB_METHOD, fallback1);
-        builder.methodFallback(FROB_METHOD, fallback2);
+        this.builder.methodFallback(FROB_METHOD, fallback1);
+        this.builder.methodFallback(FROB_METHOD, fallback2);
 
-        assertThat(builder.fallbackMap.get(FROB_METHOD), is((Callable)fallback2));
+        assertThat(this.builder.fallbackMap.get(FROB_METHOD), is((Callable) fallback2));
     }
 
     @AutoValue

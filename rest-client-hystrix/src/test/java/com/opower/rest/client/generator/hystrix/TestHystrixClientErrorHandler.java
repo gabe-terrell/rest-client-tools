@@ -35,7 +35,8 @@ public class TestHystrixClientErrorHandler {
     private HystrixClientErrorHandler errorHandler = new HystrixClientErrorHandler(EMPTY_MAP, this.clientErrorHandler);
 
     private final Method method = TestHystrixClientErrorHandler.class.getMethods()[0];
-    private final Map<Method, ? extends BadRequestCriteria> criteriaMap = ImmutableMap.of(method, new BadRequestCriteria() {
+    private final Map<Method, ? extends BadRequestCriteria> criteriaMap 
+            = ImmutableMap.of(this.method, new BadRequestCriteria() {
         @Override
         public boolean apply(BaseClientResponse response, Exception exception) {
             return response.getStatus() == HttpResponseCodes.SC_NOT_FOUND;
@@ -84,7 +85,8 @@ public class TestHystrixClientErrorHandler {
     @Test(expected = ClientResponseFailure.class)
     public void customFailedRequestNoInterceptor() {
         @SuppressWarnings("unchecked")
-        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(criteriaMap, this.clientErrorHandler);
+        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(this.criteriaMap,
+                                                                                            this.clientErrorHandler);
         // response that doesn't match the configured criteria
         BaseClientResponse response = dummyResponse(HttpResponseCodes.SC_INTERNAL_SERVER_ERROR);
         ClientResponseFailure cause = new ClientResponseFailure(response);
@@ -94,7 +96,8 @@ public class TestHystrixClientErrorHandler {
 
     @Test(expected = IllegalArgumentException.class)
     public void customFailedRequestInterceptorThrows() {
-        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(this.criteriaMap, this.clientErrorHandler);
+        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(this.criteriaMap,
+                                                                                            this.clientErrorHandler);
         // response that doesn't match the configured criteria
         BaseClientResponse response = dummyResponse(HttpResponseCodes.SC_INTERNAL_SERVER_ERROR);
         ClientResponseFailure cause = new ClientResponseFailure(response);
@@ -104,7 +107,8 @@ public class TestHystrixClientErrorHandler {
 
     @Test
     public void customBadRequestInterceptorThrows() {
-        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(this.criteriaMap, this.clientErrorHandler);
+        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(this.criteriaMap,
+                                                                                            this.clientErrorHandler);
         BaseClientResponse response = dummyResponse(HttpResponseCodes.SC_NOT_FOUND);
         ClientResponseFailure cause = new ClientResponseFailure(CAUSE, response);
         prepareHandler(response, cause, new IllegalArgumentException(CAUSE));
@@ -114,7 +118,8 @@ public class TestHystrixClientErrorHandler {
     @Test
     public void customBadRequestNoInterceptors() {
         @SuppressWarnings("unchecked")
-        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(this.criteriaMap, this.clientErrorHandler);
+        HystrixClientErrorHandler hystrixClientErrorHandler = new HystrixClientErrorHandler(this.criteriaMap,
+                                                                                            this.clientErrorHandler);
         BaseClientResponse response = dummyResponse(HttpResponseCodes.SC_NOT_FOUND);
         ClientResponseFailure cause = new ClientResponseFailure(CAUSE, response);
         prepareHandler(response, cause, cause);
@@ -124,9 +129,10 @@ public class TestHystrixClientErrorHandler {
     private void ensureBadRequestException(HystrixClientErrorHandler hystrixClientErrorHandler, BaseClientResponse response,
                                            RuntimeException cause) {
         try {
-            hystrixClientErrorHandler.clientErrorHandling(method, response, cause);
+            hystrixClientErrorHandler.clientErrorHandling(this.method, response, cause);
             fail();
-        } catch (HystrixBadRequestException ex) {
+        } 
+        catch (HystrixBadRequestException ex) {
             assertThat(ex.getCause().getMessage(), is(CAUSE));
         }
     }
@@ -134,9 +140,10 @@ public class TestHystrixClientErrorHandler {
     private void ensureFailure(HystrixClientErrorHandler hystrixClientErrorHandler, BaseClientResponse response,
                                RuntimeException cause) {
         try {
-            hystrixClientErrorHandler.clientErrorHandling(method, response, cause);
+            hystrixClientErrorHandler.clientErrorHandling(this.method, response, cause);
             fail();
-        } catch (HystrixBadRequestException ex) {
+        } 
+        catch (HystrixBadRequestException ex) {
             fail();
         }
     }

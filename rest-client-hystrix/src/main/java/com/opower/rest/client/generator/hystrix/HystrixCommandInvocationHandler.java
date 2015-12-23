@@ -78,7 +78,8 @@ final class HystrixCommandInvocationHandler<T> implements InvocationHandler {
             ProxyCommand command = new ProxyCommand(this.commandSetters.get(method), method, args,
                                                     (Callable<Object>) this.fallbacks.get(method), this.target);
             return execute(command);
-        } else {
+        } 
+        else {
             return method.invoke(this.target, args);
         }
 
@@ -95,9 +96,11 @@ final class HystrixCommandInvocationHandler<T> implements InvocationHandler {
     static Object execute(HystrixCommand command) throws Throwable {
         try {
             return command.execute();
-        } catch (HystrixBadRequestException ex) {
+        } 
+        catch (HystrixBadRequestException ex) {
             throw ex.getCause();
-        } catch (HystrixRuntimeException ex) {
+        } 
+        catch (HystrixRuntimeException ex) {
             // fallback failures should always just throw the HystrixRuntimeException
             if (ex.getFallbackException() != null) {
                 throw ex;
@@ -116,10 +119,12 @@ final class HystrixCommandInvocationHandler<T> implements InvocationHandler {
         if (cause != null) {
             if (cause instanceof InvocationTargetException) {
                 return ((InvocationTargetException) cause).getTargetException();
-            } else {
+            } 
+            else {
                 return cause;
             }
-        } else {
+        } 
+        else {
             return ex;
         }
     }

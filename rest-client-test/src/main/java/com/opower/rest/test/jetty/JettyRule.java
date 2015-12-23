@@ -58,7 +58,8 @@ public class JettyRule extends ExternalResource {
             try {
                 this.server.start();
                 this.wrapped.evaluate();
-            } finally {
+            } 
+            finally {
                 this.server.stop();
             }
         }
