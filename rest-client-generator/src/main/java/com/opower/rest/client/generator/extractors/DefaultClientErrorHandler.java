@@ -66,7 +66,7 @@ public class DefaultClientErrorHandler implements ClientErrorHandler {
             }
         } else {
             String status = clientResponse == null ? "null" : Integer.toString(clientResponse.getStatus());
-            LOG.warn("The HTTP request was successful and retuned a status of {}. However, there was a problem processing " +
+            LOG.warn("The HTTP request was successful and returned a status of {}. However, there was a problem processing " +
                      "the response on the client side. Usually this is a deserialization problem, check the configuration " +
                      "of your MessageBodyReader.", status);
         }
